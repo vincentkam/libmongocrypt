@@ -1,6 +1,13 @@
+functions:
+  "fetch source":
+  - command: git.get_project
+    params: {directory: libmongocrypt}
+
 pre:
+- func: "fetch source"
 - command: shell.exec
-  params: { script: "pre.sh" }
+  working_dir: libmongocrypt
+  params: { script: "sh ./.evergreen/pre.sh" }
 
 tasks:
 - name: compile-openssl
@@ -8,10 +15,11 @@ tasks:
   - command: shell.exec
     params:
       script: |-
-        echo "Compile placholder"
+        echo "Compile placeholder"
 
 buildvariants:
-- name: Ubuntu 16.04
+- name: ubuntu1604
+  display_name: "Ubuntu 16.04"
   run_on: ubuntu1604-test
   tasks:
   - compile-openssl
