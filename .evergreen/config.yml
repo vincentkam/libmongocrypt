@@ -17,8 +17,9 @@ pre:
 - func: "fetch source"
 - func: "make files executable"
 - command: shell.exec
-  working_dir: libmongocrypt
-  params: { script: "sh ./.evergreen/pre.sh" }
+  params:
+    working_dir: libmongocrypt
+    script: "sh ./.evergreen/pre.sh"
 
 tasks:
 - name: compile-openssl
