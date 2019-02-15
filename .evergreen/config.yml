@@ -3,8 +3,19 @@ functions:
   - command: git.get_project
     params: {directory: libmongocrypt}
 
+  "make files executable":
+  - command: shell.exec
+    params:
+      working_dir: libmongocrypt
+      script: |-
+        set -o errexit
+        for i in $(find .evergreen -name \*.sh); do
+          chmod +x $i
+        done
+
 pre:
 - func: "fetch source"
+- func: "make files executable"
 - command: shell.exec
   working_dir: libmongocrypt
   params: { script: "sh ./.evergreen/pre.sh" }
