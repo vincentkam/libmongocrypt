@@ -19,19 +19,20 @@ pre:
 - command: shell.exec
   params:
     working_dir: libmongocrypt
-    script: "sh ./.evergreen/pre.sh"
+    script: ./.evergreen/pre.sh
 
 tasks:
-- name: compile-openssl
+# Compile tasks take the form:
+# compile-{debug|release}-ssl:{openssl|mac|windows}
+- name: compile-debug-ssl:openssl
   commands:
   - command: shell.exec
     params:
-      script: |-
-        echo "Compile placeholder"
+      script: ./.evergreen/compile.sh
 
 buildvariants:
 - name: ubuntu1604
   display_name: "Ubuntu 16.04"
-  run_on: ubuntu1604-test
+  run_on: localhostdistro
   tasks:
-  - compile-openssl
+  - compile-debug-ssl:openssl
