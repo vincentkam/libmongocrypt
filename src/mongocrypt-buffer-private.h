@@ -18,6 +18,7 @@
 #define MONGOCRYPT_BUFFER_H
 
 #include <bson/bson.h>
+#include "mongocrypt-binary.h"
 
 struct _mongocrypt_binary_t;
 

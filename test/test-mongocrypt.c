@@ -33,6 +33,14 @@
 #define ASSERT_OR_PRINT_BSON(_statement, _err) \
    ASSERT_OR_PRINT_MSG (_statement, _err.message)
 
+#define ASSERT_DATA_INTIIALIZED(_out, _limit)                                       \
+   do {                                                                        \
+      char zero[_out->len];                                                     \
+      memset (zero, 0, _out->len);                                              \
+      BSON_ASSERT (0 != memcmp (zero, _out->data, _limit));                     \
+      BSON_ASSERT (0 == memcmp (zero, _out->data + _limit, _out->len - _limit)); \
+   } while (0)
+
 /* read the schema file, create mongocrypt_t handle with options. */
 static void
 _setup (mongocrypt_opts_t *opts, bson_t *one_schema)
@@ -475,6 +483,7 @@ _test_random_generator (void)
    _init_buffer_with_count (&out, count);
 
    BSON_ASSERT (_mongocrypt_random (&out, status, count));
+   ASSERT_DATA_INTIIALIZED ((&out), count);
    BSON_ASSERT (0 != memcmp (zero, out.data, count)); /* initialized */
 
    mongocrypt_status_destroy (status);
@@ -484,13 +493,13 @@ _test_random_generator (void)
    _init_buffer_with_count (&out, count);
 
    BSON_ASSERT (_mongocrypt_random (&out, status, mid));
-   BSON_ASSERT (0 != memcmp (zero, out.data, mid));       /* initialized */
-   BSON_ASSERT (0 == memcmp (zero, out.data + mid, mid)); /* uninitialized */
+   ASSERT_DATA_INTIIALIZED ((&out), mid);
 
    mongocrypt_status_destroy (status);
    _mongocrypt_buffer_cleanup (&out);
 }
 
+<<<<<<< HEAD
 
 static void
 _init_and_fill_buffer (_mongocrypt_buffer_t *buf, int n)
@@ -586,6 +595,24 @@ _test_malformed_ciphertext (void)
 }
 
 
+=======
+static void
+_test_data_key_generation ()
+{
+   mongocrypt_binary_t *binary;
+   mongocrypt_status_t *status;
+   uint8_t data_key_size = 64;
+
+   status = mongocrypt_status_new ();
+
+   binary = mongocrypt_generate_new_data_key (status);
+   ASSERT_DATA_INTIIALIZED (binary, data_key_size);
+
+   mongocrypt_status_destroy (status);
+   mongocrypt_binary_destroy (binary);
+}
+
+>>>>>>> 8adf6c7... function skeletons
 #define ADD_TEST(fn)                          \
    do {                                       \
       bool found = true;                      \
@@ -622,6 +649,11 @@ main (int argc, char **argv)
    ADD_TEST (_test_log);
    ADD_TEST (_test_state_machine)
    ADD_TEST (_test_random_generator);
+<<<<<<< HEAD
    ADD_TEST (_test_ciphertext_serialization);
    ADD_TEST (_test_malformed_ciphertext);
+=======
+   ADD_TEST (_test_data_key_generation);
+   printf ("All %d tests passed\n", count);
+>>>>>>> 8adf6c7... function skeletons
 }

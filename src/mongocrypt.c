@@ -151,3 +151,49 @@ mongocrypt_destroy (mongocrypt_t *crypt)
    _mongocrypt_log_cleanup (&crypt->log);
    bson_free (crypt);
 }
+
+mongocrypt_binary_t *
+mongocrypt_generate_new_data_key (mongocrypt_status_t *status)
+{
+   _mongocrypt_buffer_t buffer;
+   uint8_t data_key_size = 64;
+   mongocrypt_binary_t *binary;
+   kms_request_t *kms_request;
+
+   buffer.len = data_key_size;
+   buffer.data = bson_malloc0 (data_key_size);
+   buffer.owned = true;
+   BSON_ASSERT (_mongocrypt_random (&buffer, status, data_key_size));
+   binary = _mongocrypt_buffer_to_binary (&buffer);
+
+   
+   // TODO: asks the driver to encrypt the data key material with KMS by
+   // TODO: returning a mongocrypt_key_decryptor_t (being added in CDRIVER-2949)
+   
+   /*
+   * EXAMPLE
+   * 
+   * char* plaintext = "foobar";
+   * kms_request_t *request = kms_encrypt_request_new ((uint8_t*) plaintext,
+   *  strlen(plaintext), "alias/1", NULL);
+   *
+   * set_test_date (request);
+   * kms_request_set_region (request, "us-east-1");
+   * kms_request_set_service (request, "service");
+   * kms_request_set_access_key_id (request, "AKIDEXAMPLE");
+   * kms_request_set_secret_key (request,
+                               * "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY");
+   *
+   * test_compare_creq (request, "test/encrypt");
+   * test_compare_sreq (request, "test/encrypt");
+   *
+   * kms_request_destroy (request);
+   * }
+   */
+
+   kms_request = kms_encrypt_request_new (mongocrypt_binary_data(binary), mongocrypt_binary_len(binary), "alias/1", NULL);
+
+   // TODO: returns the final encrypted data key
+
+   return binary;
+}

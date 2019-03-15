@@ -80,4 +80,6 @@ mongocrypt_new (const mongocrypt_opts_t *opts, mongocrypt_status_t *status);
 void
 mongocrypt_destroy (mongocrypt_t *crypt);
 
+mongocrypt_binary_t * 
+mongocrypt_generate_new_data_key (mongocrypt_status_t *status);
 #endif /* MONGOCRYPT_H */
