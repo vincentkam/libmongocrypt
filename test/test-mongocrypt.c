@@ -499,7 +499,6 @@ _test_random_generator (void)
    _mongocrypt_buffer_cleanup (&out);
 }
 
-<<<<<<< HEAD
 
 static void
 _init_and_fill_buffer (_mongocrypt_buffer_t *buf, int n)
@@ -595,7 +594,6 @@ _test_malformed_ciphertext (void)
 }
 
 
-=======
 static void
 _test_data_key_generation ()
 {
@@ -612,7 +610,6 @@ _test_data_key_generation ()
    mongocrypt_binary_destroy (binary);
 }
 
->>>>>>> 8adf6c7... function skeletons
 #define ADD_TEST(fn)                          \
    do {                                       \
       bool found = true;                      \
@@ -649,11 +646,8 @@ main (int argc, char **argv)
    ADD_TEST (_test_log);
    ADD_TEST (_test_state_machine)
    ADD_TEST (_test_random_generator);
-<<<<<<< HEAD
    ADD_TEST (_test_ciphertext_serialization);
    ADD_TEST (_test_malformed_ciphertext);
-=======
    ADD_TEST (_test_data_key_generation);
    printf ("All %d tests passed\n", count);
->>>>>>> 8adf6c7... function skeletons
 }
