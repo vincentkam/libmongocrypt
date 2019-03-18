@@ -10,6 +10,7 @@
 #include <mongocrypt-key-cache-private.h>
 #include <mongocrypt-log-private.h>
 #include <mongocrypt-private.h>
+#include <mongocrypt-decryptor-private.h>
 
 
 #define ASSERT_OR_PRINT_MSG(_statement, msg)          \
