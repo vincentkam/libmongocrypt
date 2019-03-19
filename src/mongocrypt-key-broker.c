@@ -111,8 +111,8 @@ _mongocrypt_key_broker_add_doc (mongocrypt_key_broker_t *kb,
          memcpy (&kbi->key_returned, &key, sizeof (key));
          kbi->state = KEY_ENCRYPTED;
 
-         _mongocrypt_key_decryptor_init (
-            &kbi->key_decryptor, &kbi->key_returned.key_material, kbi);
+         _mongocrypt_key_init (
+            &kbi->key_decryptor, NULL, &kbi->key_returned.key_material, kbi);
          return true;
       }
    }

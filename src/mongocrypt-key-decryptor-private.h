@@ -21,18 +21,25 @@
 #include "mongocrypt-buffer-private.h"
 #include "kms_message/kms_decrypt_request.h"
 
+typedef enum {
+   MONGOCRYPT_DECRYPT = 0,
+   MONGOCCRYPT_ENCRYPT,
+} _mongocrypt_key_conversion_t;
+
 struct _mongocrypt_key_decryptor_t {
    kms_request_t *req;
    kms_response_parser_t *parser;
    mongocrypt_status_t *status;
    _mongocrypt_buffer_t msg;
    void *ctx;
+   _mongocrypt_key_conversion_t conversion; 
 };
 
 void
-_mongocrypt_key_decryptor_init (mongocrypt_key_decryptor_t *kd,
-                                _mongocrypt_buffer_t *key_material,
-                                void *ctx);
+_mongocrypt_key_init (mongocrypt_key_decryptor_t *kd,
+                      const char *key_id,
+                      _mongocrypt_buffer_t *key_material,
+                      void *ctx);
 void
 _mongocrypt_key_decryptor_cleanup (mongocrypt_key_decryptor_t *kd);
 

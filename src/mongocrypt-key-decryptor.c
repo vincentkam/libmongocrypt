@@ -22,9 +22,10 @@
 #include "mongocrypt-key-decryptor-private.h"
 
 void
-_mongocrypt_key_decryptor_init (mongocrypt_key_decryptor_t *kd,
-                                _mongocrypt_buffer_t *key_material,
-                                void *ctx)
+_mongocrypt_key_init (mongocrypt_key_decryptor_t *kd,
+                      const char *key_id,
+                      _mongocrypt_buffer_t *key_material,
+                      void *ctx)
 {
    kms_request_opt_t *opt;
    /* create the KMS request. */
@@ -32,8 +33,12 @@ _mongocrypt_key_decryptor_init (mongocrypt_key_decryptor_t *kd,
    /* TODO: we might want to let drivers control whether or not we send
       * Connection: close header. Unsure right now. */
    kms_request_opt_set_connection_close (opt, true);
-   kd->req =
+   if (kd->conversion == MONGOCCRYPT_ENCRYPT) {
+      kd->req = kms_encrypt_request_new (key_material->data, key_id, key_material->len, opt);
+   } else if (kd->conversion == MONGOCRYPT_DECRYPT) {
+      kd->req =
       kms_decrypt_request_new (key_material->data, key_material->len, opt);
+   }
    kd->parser = kms_response_parser_new ();
    kd->ctx = ctx;
 
