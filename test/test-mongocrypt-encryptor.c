@@ -30,7 +30,7 @@ _mongocrypt_tester_run_encryptor_to (_mongocrypt_tester_t *tester,
 {
    mongocrypt_encryptor_state_t state;
    mongocrypt_binary_t *bin;
-   mongocrypt_key_broker_t *key_broker;
+   _mongocrypt_key_broker_t *key_broker;
 
    state = mongocrypt_encryptor_state (encryptor);
    while (state != stop_state) {
@@ -286,7 +286,7 @@ _test_encryptor_need_keys (_mongocrypt_tester_t *tester)
    mongocrypt_status_t *status;
    mongocrypt_encryptor_t *encryptor;
    mongocrypt_encryptor_state_t state;
-   mongocrypt_key_broker_t *key_broker;
+   _mongocrypt_key_broker_t *key_broker;
 
    status = mongocrypt_status_new ();
 
