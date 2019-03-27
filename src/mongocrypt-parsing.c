@@ -87,7 +87,8 @@ _mongocrypt_marking_parse_unowned (const _mongocrypt_buffer_t *in,
       CLIENT_ERR ("invalid marking, no 'a'");
       goto cleanup;
    }
-   out->algorithm = (uint8_t) bson_iter_int32 (&iter);
+   /* TODO: once SERVER-40243 is resolved, use the algorithm from the marking. */
+   out->algorithm = 1;
 
    ret = true;
 cleanup:
