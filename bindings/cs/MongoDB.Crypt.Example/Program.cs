@@ -164,6 +164,7 @@ namespace drivertest
 
             Console.WriteLine("KMS: " + request.Endpoint);
 
+            // change me to use the mock
             if (_kmsEndpoint != null)
             {
                 tcpClient.Connect(_kmsEndpoint.DnsSafeHost, _kmsEndpoint.Port);
@@ -381,6 +382,7 @@ namespace drivertest
             BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
 
             Console.WriteLine("Using url: " + args);
+            // or change me to use the mock
             Uri kmsURL = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") != null ? null :  new Uri("https://localhost:8000");
 
             var cryptDUrl = new MongoUrl("mongodb://localhost:1234");
