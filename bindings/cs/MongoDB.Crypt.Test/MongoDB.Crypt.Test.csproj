@@ -19,6 +19,11 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
   </ItemGroup>
 
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net452'">
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <CMakeCurrentSourceDir>.</CMakeCurrentSourceDir>
   </PropertyGroup>
