@@ -59,6 +59,7 @@ namespace MongoDB.Crypt.Test
             {
                 var (bsonCommand, binaryCommand) = ProcessContextToCompletion(context);
 
+                bsonCommand.Should().Equal(ReadJSONTestFile("encrypted-command.json"));
             }
         }
 
@@ -135,7 +136,7 @@ namespace MongoDB.Crypt.Test
 
             return (document, buffer);
         }
-        
+
         private (CryptContext.StateCode state, BsonDocument document, byte[] buffer) ProcessState(CryptContext context)
         {
             _output.WriteLine("\n----------------------------------\nState:" + context.State);
@@ -273,7 +274,5 @@ namespace MongoDB.Crypt.Test
 
             return BsonUtil.FromJSON(text);
         }
-
-
     }
 }
