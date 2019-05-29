@@ -94,7 +94,7 @@ namespace MongoDB.Crypt.Test
 
             byte[] encryptedResult;
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartExplicitEncryptionContext(key, Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Randomized, testData, null))
+            using (var context = foo.StartExplicitEncryptionContext(key, Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData, null))
             {
                 encryptedResult = ProcessState(context);
             }
