@@ -26,8 +26,8 @@ namespace MongoDB.Crypt
             {
                 case Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic:
                     return "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic";
-                case Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Randomized:
-                    return "AEAD_AES_256_CBC_HMAC_SHA_512-Randomized";
+                case Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random:
+                    return "AEAD_AES_256_CBC_HMAC_SHA_512-Random";
                 default:
                     throw new NotImplementedException();
             }
