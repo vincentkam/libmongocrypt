@@ -20,11 +20,19 @@ using System.Diagnostics;
 using System.IO;
 using Xunit;
 using System.Text;
+using Xunit.Abstractions;
 
 namespace MongoDB.Crypt.Test
 {
     public class BasicTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public BasicTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+        
         CryptOptions CreateOptions()
         {
             CryptOptions options = new CryptOptions();
@@ -71,7 +79,7 @@ namespace MongoDB.Crypt.Test
             {
                 var binary = context.GetOperation();
                 var doc = BsonUtil.ToDocument(binary);
-                Console.WriteLine("ListCollections: " + doc);
+                _output.WriteLine("ListCollections: " + doc);
 
                 // Ensure if we encrypt non-sense, it throws an exception demonstrating our exception code is good
                 Xunit.Assert.Throws<CryptException>( () => context.Feed(new byte[] { 0x1, 0x2, 0x3 }) );
@@ -165,16 +173,16 @@ namespace MongoDB.Crypt.Test
 
             while (!context.IsDone)
             {
-                Console.WriteLine("\n----------------------------------\nState:" + context.State);
+                _output.WriteLine("\n----------------------------------\nState:" + context.State);
                 switch (context.State)
                 {
                     case CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO:
                         {
                             var binary = context.GetOperation();
                             var doc = BsonUtil.ToDocument(binary);
-                            Console.WriteLine("ListCollections: " + doc);
+                            _output.WriteLine("ListCollections: " + doc);
                             var reply = ReadJSONTestFile("collection-info.json");
-                            Console.WriteLine("Reply:" + reply);
+                            _output.WriteLine("Reply:" + reply);
                             context.Feed(BsonUtil.ToBytes(reply));
                             context.MarkDone();
                             break;
@@ -183,9 +191,9 @@ namespace MongoDB.Crypt.Test
                         {
                             var binary = context.GetOperation();
                             var doc = BsonUtil.ToDocument(binary);
-                            Console.WriteLine("Markings: " + doc);
+                            _output.WriteLine("Markings: " + doc);
                             var reply = ReadJSONTestFile("mongocryptd-reply.json");
-                            Console.WriteLine("Reply:" + reply);
+                            _output.WriteLine("Reply:" + reply);
                             context.Feed(BsonUtil.ToBytes(reply));
                             context.MarkDone();
                             break;
@@ -194,9 +202,9 @@ namespace MongoDB.Crypt.Test
                         {
                             var binary = context.GetOperation();
                             var doc = BsonUtil.ToDocument(binary);
-                            Console.WriteLine("Key Document: " + doc);
+                            _output.WriteLine("Key Document: " + doc);
                             var reply = ReadJSONTestFile("key-document.json");
-                            Console.WriteLine("Reply:" + reply);
+                            _output.WriteLine("Reply:" + reply);
                             context.Feed(BsonUtil.ToBytes(reply));
                             context.MarkDone();
                             break;
@@ -207,9 +215,9 @@ namespace MongoDB.Crypt.Test
                             foreach (var req in requests)
                             {
                                 var binary = req.Message;
-                                Console.WriteLine("Key Document: " + binary);
+                                _output.WriteLine("Key Document: " + binary);
                                 var reply = ReadHttpTestFile("kms-decrypt-reply.txt");
-                                Console.WriteLine("Reply:" + reply);
+                                _output.WriteLine("Reply:" + reply);
                                 req.Feed(Encoding.UTF8.GetBytes( reply));
                                 Xunit.Assert.Equal(0.0, req.BytesNeeded);
                             }
@@ -219,19 +227,19 @@ namespace MongoDB.Crypt.Test
                     case CryptContext.StateCode.MONGOCRYPT_CTX_READY:
                         {
                             Binary b = context.FinalizeForEncryption();
-                            Console.WriteLine("Buffer:" + b.ToArray());
                             buffer = b.ToArray();
                             return buffer;
+                            _output.WriteLine("Buffer:" + b.ToArray());
                         }
                     case CryptContext.StateCode.MONGOCRYPT_CTX_DONE:
                         {
-                            Console.WriteLine("DONE!!");
                             return buffer;
+                            _output.WriteLine("DONE!!");
                         }
                     case CryptContext.StateCode.MONGOCRYPT_CTX_NOTHING_TO_DO:
                         {
-                            Console.WriteLine("NOTHING TO DO");
                             return buffer;
+                            _output.WriteLine("NOTHING TO DO");
                         }
                     case CryptContext.StateCode.MONGOCRYPT_CTX_ERROR:
                         {
