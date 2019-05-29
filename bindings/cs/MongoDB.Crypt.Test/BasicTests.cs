@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using Xunit;
 using System.Text;
+using FluentAssertions;
 using Xunit.Abstractions;
 
 namespace MongoDB.Crypt.Test
@@ -82,7 +83,10 @@ namespace MongoDB.Crypt.Test
                 _output.WriteLine("ListCollections: " + doc);
 
                 // Ensure if we encrypt non-sense, it throws an exception demonstrating our exception code is good
-                Xunit.Assert.Throws<CryptException>( () => context.Feed(new byte[] { 0x1, 0x2, 0x3 }) );
+                Action act = () => context.Feed(new byte[] {0x1, 0x2, 0x3});
+                var exception = Record.Exception(act);
+
+                exception.Should().BeOfType<CryptException>();
             }
         }
 
@@ -115,7 +119,7 @@ namespace MongoDB.Crypt.Test
                 (_, decryptedResult) = ProcessContextToCompletion(context);
             }
 
-            Xunit.Assert.Equal(testData, decryptedResult);
+            decryptedResult.Should().Equal(testData);
         }
 
         private (BsonDocument document, byte[] buffer) ProcessContextToCompletion(CryptContext context)
@@ -183,7 +187,7 @@ namespace MongoDB.Crypt.Test
                         var reply = ReadHttpTestFile("kms-decrypt-reply.txt");
                         _output.WriteLine("Reply:" + reply);
                         req.Feed(Encoding.UTF8.GetBytes(reply));
-                        Xunit.Assert.Equal(0.0, req.BytesNeeded);
+                        req.BytesNeeded.Should().Be(0);
                     }
 
                     requests.MarkDone();
