@@ -18,7 +18,7 @@ namespace MongoDB.Crypt
 {
     public enum Alogrithm 
     {
-        AEAD_AES_256_CBC_HMAC_SHA_512_Randomized = 0,
+        AEAD_AES_256_CBC_HMAC_SHA_512_Random = 0,
         AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic = 1,
     }
 }
