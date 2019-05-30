@@ -36,14 +36,14 @@ namespace MongoDB.Crypt.Test
         
         CryptOptions CreateOptions()
         {
-            CryptOptions options = new CryptOptions();
-            options.KmsCredentials = new AwsKmsCredentials()
+            return new CryptOptions
             {
-                AwsSecretAccessKey = "us-east-1",
-                AwsAccessKeyId = "us-east-1",
+                KmsCredentials = new AwsKmsCredentials
+                {
+                    AwsSecretAccessKey = "us-east-1",
+                    AwsAccessKeyId = "us-east-1",
+                }
             };
-
-            return options;
         }
 
         AwsKeyId CreateKey()
