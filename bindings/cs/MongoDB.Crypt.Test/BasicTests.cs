@@ -57,9 +57,25 @@ namespace MongoDB.Crypt.Test
             using (var foo = CryptClientFactory.Create(CreateOptions()))
             using (var context = foo.StartEncryptionContext("test.test", null))
             {
-                var (bsonCommand, binaryCommand) = ProcessContextToCompletion(context);
+                var (state, binarySent, operationSent) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO);
+                operationSent.Should().Equal((ReadJSONTestFile("list-collections-filter.json")));
 
-                bsonCommand.Should().Equal(ReadJSONTestFile("encrypted-command.json"));
+                (state, _, operationSent) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS);
+                operationSent.Should().Equal(ReadJSONTestFile("json-schema.json"));
+
+                (state, _, operationSent) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
+                operationSent.Should().Equal(ReadJSONTestFile("key-filter.json"));
+
+                (state, binarySent, _) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS);
+                // kms fluent assertions inside ProcessState()
+
+                (state, _, operationSent) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
+                operationSent.Should().Equal((ReadJSONTestFile("encrypted-command.json")));
             }
         }
 
@@ -105,39 +121,47 @@ namespace MongoDB.Crypt.Test
 
             var testData = BsonUtil.ToBytes(doc);
 
-            byte[] encryptedResult;
+            Binary encryptedResult;
             using (var foo = CryptClientFactory.Create(CreateOptions()))
             using (var context = foo.StartExplicitEncryptionContext(key, Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData, null))
             {
-                (_, encryptedResult) = ProcessContextToCompletion(context);
+                (encryptedResult, _) = ProcessContextToCompletion(context);
             }
 
-            byte[] decryptedResult;
 
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartExplicitDecryptionContext(encryptedResult))
+            using (var context = foo.StartExplicitDecryptionContext(encryptedResult.ToArray()))
             {
-                (_, decryptedResult) = ProcessContextToCompletion(context);
+                var (decryptedResult, _) = ProcessContextToCompletion(context);
+
+                decryptedResult.ToArray().Should().Equal(testData);
             }
 
-            decryptedResult.Should().Equal(testData);
+
         }
 
-        private (BsonDocument document, byte[] buffer) ProcessContextToCompletion(CryptContext context)
+        private (Binary binarySent, BsonDocument document) ProcessContextToCompletion(CryptContext context)
         {
             CryptContext.StateCode state;
             BsonDocument document = null;
-            byte[] buffer = null;
+            Binary binary = null;
 
             while (!context.IsDone)
             {
-                (_, document, buffer) = ProcessState(context);
+                (_, binary, document) = ProcessState(context);
             }
 
-            return (document, buffer);
+            return (binary, document);
         }
 
-        private (CryptContext.StateCode state, BsonDocument document, byte[] buffer) ProcessState(CryptContext context)
+        /// <summary>
+        /// Processes the current state, simulating the execution the operation/post requests needed to reach the next state
+        /// Returns (stateProcessed, binaryOperationSent, operationSent)
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        private (CryptContext.StateCode stateProcessed, Binary binarySent, BsonDocument bsonOperationSent) ProcessState(CryptContext context)
         {
             _output.WriteLine("\n----------------------------------\nState:" + context.State);
             switch (context.State)
@@ -151,7 +175,7 @@ namespace MongoDB.Crypt.Test
                     _output.WriteLine("Reply:" + reply);
                     context.Feed(BsonUtil.ToBytes(reply));
                     context.MarkDone();
-                    return (CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO, null, null);
+                    return (CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO, binary, doc);
                 }
 
                 case CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS:
@@ -163,7 +187,7 @@ namespace MongoDB.Crypt.Test
                     _output.WriteLine("Reply:" + reply);
                     context.Feed(BsonUtil.ToBytes(reply));
                     context.MarkDone();
-                    return (CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS, null, null);
+                    return (CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS, binary, doc);
                 }
 
                 case CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS:
@@ -175,7 +199,7 @@ namespace MongoDB.Crypt.Test
                     _output.WriteLine("Reply:" + reply);
                     context.Feed(BsonUtil.ToBytes(reply));
                     context.MarkDone();
-                    return (CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS, null, null);
+                    return (CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS, binary, doc);
                 }
 
                 case CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS:
@@ -185,8 +209,11 @@ namespace MongoDB.Crypt.Test
                     {
                         var binary = req.Message;
                         _output.WriteLine("Key Document: " + binary);
+                        var postRequest = binary.ToString();
+                        postRequest.Should().Contain("Host:kms.us-east-1.amazonaws.com");
+
                         var reply = ReadHttpTestFile("kms-decrypt-reply.txt");
-                        _output.WriteLine("Reply:" + reply);
+                        _output.WriteLine("Reply: " + reply);
                         req.Feed(Encoding.UTF8.GetBytes(reply));
                         req.BytesNeeded.Should().Be(0);
                     }
@@ -197,11 +224,10 @@ namespace MongoDB.Crypt.Test
 
                 case CryptContext.StateCode.MONGOCRYPT_CTX_READY:
                 {
-                    Binary b = context.FinalizeForEncryption();
-                    _output.WriteLine("Buffer:" + b.ToArray());
-                    var document = BsonUtil.ToDocument(b);
-                    var buffer = b.ToArray();
-                    return (CryptContext.StateCode.MONGOCRYPT_CTX_READY, document, buffer);
+                    Binary binary = context.FinalizeForEncryption();
+                    _output.WriteLine("Buffer:" + binary.ToArray());
+                    var document = BsonUtil.ToDocument(binary);
+                    return (CryptContext.StateCode.MONGOCRYPT_CTX_READY, binary, document);
                 }
 
                 case CryptContext.StateCode.MONGOCRYPT_CTX_DONE:
