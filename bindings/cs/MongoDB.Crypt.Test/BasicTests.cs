@@ -184,12 +184,12 @@ namespace MongoDB.Crypt.Test
 
         /// <summary>
         /// Processes the current state, simulating the execution the operation/post requests needed to reach the next state
-        /// Returns (stateProcessed, binaryOperationSent, operationSent)
+        /// Returns (stateProcessed, binaryOperationProduced, bsonOperationProduced)
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        private (CryptContext.StateCode stateProcessed, Binary binarySent, BsonDocument bsonOperationSent) ProcessState(CryptContext context)
+        private (CryptContext.StateCode stateProcessed, Binary binaryProduced, BsonDocument bsonOperationProduced) ProcessState(CryptContext context)
         {
             _output.WriteLine("\n----------------------------------\nState:" + context.State);
             switch (context.State)
