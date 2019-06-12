@@ -95,6 +95,25 @@ namespace MongoDB.Crypt.Test
                 var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
                 bsonCommand.Should().Equal(new BsonDocument("ssn", "457-55-5462"));
             }
+
+            using (var foo = CryptClientFactory.Create(CreateOptions()))
+            using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJSONTestFile("encrypted-document.json"))))
+            {
+                var (state, binaryProduced, operationProduced) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
+                operationProduced.Should().Equal(ReadJSONTestFile("key-filter.json"));
+
+                (state, binaryProduced, _) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS);
+                // kms fluent assertions inside ProcessState()
+
+                (state, _, operationProduced) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
+                var decryptedDocument = operationProduced; // todo: fix naming problem
+                operationProduced.Should().Equal(new BsonDocument("ssn", "457-55-5462"));
+
+                (state, _, operationProduced) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
             }
         }
 
