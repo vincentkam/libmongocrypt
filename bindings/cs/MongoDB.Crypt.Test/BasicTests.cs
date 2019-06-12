@@ -312,7 +312,7 @@ namespace MongoDB.Crypt.Test
             for(int i = 0; i < text.Length; i++) {
                 if(text[i] == '\n' && text[i - 1] != '\r' )
                     builder.Append('\r');
-            builder.Append(text[i]);
+                builder.Append(text[i]);
             }
             return builder.ToString();
         }
