@@ -93,6 +93,8 @@ namespace MongoDB.Crypt.Test
             using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJSONTestFile("encrypted-document.json"))))
             {
                 var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
+                bsonCommand.Should().Equal(new BsonDocument("ssn", "457-55-5462"));
+            }
             }
         }
 
