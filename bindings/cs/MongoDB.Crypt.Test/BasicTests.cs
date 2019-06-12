@@ -57,6 +57,13 @@ namespace MongoDB.Crypt.Test
             using (var foo = CryptClientFactory.Create(CreateOptions()))
             using (var context = foo.StartEncryptionContext("test.test", null))
             {
+                var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
+                bsonCommand.Should().Equal((ReadJSONTestFile("encrypted-command.json")));
+            }
+
+            using (var foo = CryptClientFactory.Create(CreateOptions()))
+            using (var context = foo.StartEncryptionContext("test.test", null))
+            {
                 var (state, binarySent, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO);
                 operationSent.Should().Equal((ReadJSONTestFile("list-collections-filter.json")));
