@@ -231,6 +231,8 @@ namespace drivertest
                         }
                     case CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS:
                         {
+                            // new change: will likely feed command into context and get the concatted command
+                            // back with schema
                             var binary = context.GetOperation();
                             var schema = BsonUtil.ToDocument(binary);
 
