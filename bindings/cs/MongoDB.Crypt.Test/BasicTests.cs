@@ -92,7 +92,7 @@ namespace MongoDB.Crypt.Test
             using (var foo = CryptClientFactory.Create(CreateOptions()))
             using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJSONTestFile("encrypted-document.json"))))
             {
-                var (bsonCommand, binaryCommand) = ProcessContextToCompletion(context);
+                var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
             }
         }
 
