@@ -101,8 +101,7 @@ namespace drivertest
 
         public Guid GenerateKey(IKmsCredentials credentials, IKmsKeyId kmsKeyId)
         {
-            CryptOptions options = new CryptOptions();
-            options.KmsCredentials = credentials;
+            CryptOptions options = new CryptOptions(credentials);
 
             BsonDocument key = null;
 
@@ -119,11 +118,10 @@ namespace drivertest
 
         public BsonDocument EncryptCommand(IKmsCredentials credentials, IMongoCollection<BsonDocument> coll, BsonDocument cmd)
         {
-            CryptOptions options = new CryptOptions();
-            options.KmsCredentials = credentials;
+            CryptOptions options = new CryptOptions(credentials);
 
             using (var foo = CryptClientFactory.Create(options))
-            using (var context = foo.StartEncryptionContext(coll.CollectionNamespace.FullName, null))
+            using (var context = foo.StartEncryptionContext(coll.CollectionNamespace.FullName,  command: BsonUtil.ToBytes(cmd)))
             {
                 return ProcessState(context, coll.Database, cmd);
 
@@ -132,8 +130,7 @@ namespace drivertest
 
         public BsonDocument DecryptCommand(IKmsCredentials credentials, IMongoDatabase db, BsonDocument doc)
         {
-            CryptOptions options = new CryptOptions();
-            options.KmsCredentials = credentials;
+            CryptOptions options = new CryptOptions(credentials);
 
             using (var foo = CryptClientFactory.Create(options))
             using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(doc)))
@@ -296,11 +293,6 @@ namespace drivertest
                     case CryptContext.StateCode.MONGOCRYPT_CTX_DONE:
                         {
                             Console.WriteLine("DONE!!");
-                            return ret;
-                        }
-                    case CryptContext.StateCode.MONGOCRYPT_CTX_NOTHING_TO_DO:
-                        {
-                            Console.WriteLine("NOTHING TO DO");
                             return ret;
                         }
                     case CryptContext.StateCode.MONGOCRYPT_CTX_ERROR:
