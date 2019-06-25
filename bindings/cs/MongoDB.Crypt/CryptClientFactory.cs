@@ -38,6 +38,20 @@ namespace MongoDB.Crypt
             // TODO - set logger
 
             Library.mongocrypt_init(handle);
+            if (options.Schema != null)
+            {
+                unsafe
+                {
+                    fixed (byte* schema = options.Schema)
+                    {
+                        var schemaPtr = (IntPtr)schema;
+                        using (var pinnedSchema = new PinnedBinary(schemaPtr, (uint)options.Schema.Length))
+                        {
+                            handle.Check(status, Library.mongocrypt_setopt_schema_map(handle, schema: pinnedSchema.Handle));
+                        }
+                    }
+                }
+            }
 
             return new CryptClient(handle, status);
         }

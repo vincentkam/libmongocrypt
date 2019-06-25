@@ -38,39 +38,34 @@ namespace MongoDB.Crypt
             MONGOCRYPT_CTX_ERROR = 0,
 
             /// <summary>
-            /// LibMongoCrypt has nothing more to do.
-            /// </summary>
-            MONGOCRYPT_CTX_NOTHING_TO_DO = 1,
-
-            /// <summary>
             /// LibMongoCrypt wants the collection information by running a OP_MSG command against the users' mongod.
             /// </summary>
-            MONGOCRYPT_CTX_NEED_MONGO_COLLINFO = 2,
+            MONGOCRYPT_CTX_NEED_MONGO_COLLINFO = 1,
 
             /// <summary>
             /// LibMongoCrypt wants a command to be run against mongocryptd.
             /// </summary>
-            MONGOCRYPT_CTX_NEED_MONGO_MARKINGS = 3,
+            MONGOCRYPT_CTX_NEED_MONGO_MARKINGS = 2,
 
             /// <summary>
             /// LibMongoCrypt wants a command to be run against mongod key vault.
             /// </summary>
-            MONGOCRYPT_CTX_NEED_MONGO_KEYS = 4,
+            MONGOCRYPT_CTX_NEED_MONGO_KEYS = 3,
 
             /// <summary>
             /// LibMongoCrypt wants a request sent to KMS.
             /// </summary>
-            MONGOCRYPT_CTX_NEED_KMS = 5,
+            MONGOCRYPT_CTX_NEED_KMS = 4,
 
             /// <summary>
             /// LibMongoCrypt is ready to do encryption, call Finish().
             /// </summary>
-            MONGOCRYPT_CTX_READY = 6,
+            MONGOCRYPT_CTX_READY = 5,
 
             /// <summary>
             /// LibMongoCrypt is complete.
             /// </summary>
-            MONGOCRYPT_CTX_DONE = 7
+            MONGOCRYPT_CTX_DONE = 6
         }
 
         private ContextSafeHandle _handle;

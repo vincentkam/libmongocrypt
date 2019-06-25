@@ -39,6 +39,7 @@ namespace MongoDB.Crypt
             mongocrypt_setopt_kms_provider_aws = loader.GetFunction<Delegates.mongocrypt_setopt_kms_provider_aws>("mongocrypt_setopt_kms_provider_aws");
             mongocrypt_setopt_kms_provider_local = loader.GetFunction<Delegates.mongocrypt_setopt_kms_provider_local>("mongocrypt_setopt_kms_provider_local");
             mongocrypt_setopt_log_handler = loader.GetFunction<Delegates.mongocrypt_setopt_log_handler>("mongocrypt_setopt_log_handler");
+            mongocrypt_setopt_schema_map = loader.GetFunction<Delegates.mongocrypt_setopt_schema_map>("mongocrypt_setopt_schema_map");
 
             mongocrypt_status_new = loader.GetFunction<Delegates.mongocrypt_status_new>("mongocrypt_status_new");
             mongocrypt_status_destroy = loader.GetFunction<Delegates.mongocrypt_status_destroy>("mongocrypt_status_destroy");
@@ -55,11 +56,12 @@ namespace MongoDB.Crypt
 
             mongocrypt_ctx_new = loader.GetFunction<Delegates.mongocrypt_ctx_new>("mongocrypt_ctx_new");
             mongocrypt_ctx_setopt_masterkey_aws = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_masterkey_aws>("mongocrypt_ctx_setopt_masterkey_aws");
-            mongocrypt_ctx_setopt_schema = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_schema>("mongocrypt_ctx_setopt_schema");
             mongocrypt_ctx_setopt_masterkey_local = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_masterkey_local>("mongocrypt_ctx_setopt_masterkey_local");
+            mongocrypt_ctx_setopt_key_alt_name = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_key_alt_name>("mongocrypt_ctx_setopt_key_alt_name");
             mongocrypt_ctx_setopt_key_id = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_key_id>("mongocrypt_ctx_setopt_key_id");
+
             mongocrypt_ctx_setopt_algorithm = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_algorithm>("mongocrypt_ctx_setopt_algorithm");
-            mongocrypt_ctx_setopt_initialization_vector = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_initialization_vector>("mongocrypt_ctx_setopt_initialization_vector");
+            // mongocrypt_ctx_setopt_initialization_vector = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_initialization_vector>("mongocrypt_ctx_setopt_initialization_vector");
             mongocrypt_ctx_status = loader.GetFunction<Delegates.mongocrypt_ctx_status>("mongocrypt_ctx_status");
             mongocrypt_ctx_encrypt_init = loader.GetFunction<Delegates.mongocrypt_ctx_encrypt_init>("mongocrypt_ctx_encrypt_init");
             mongocrypt_ctx_decrypt_init = loader.GetFunction<Delegates.mongocrypt_ctx_decrypt_init>("mongocrypt_ctx_decrypt_init");
@@ -105,6 +107,7 @@ namespace MongoDB.Crypt
         internal static readonly Delegates.mongocrypt_setopt_log_handler mongocrypt_setopt_log_handler;
         internal static readonly Delegates.mongocrypt_setopt_kms_provider_aws mongocrypt_setopt_kms_provider_aws;
         internal static readonly Delegates.mongocrypt_setopt_kms_provider_local mongocrypt_setopt_kms_provider_local;
+        internal static readonly Delegates.mongocrypt_setopt_schema_map mongocrypt_setopt_schema_map;
 
         internal static readonly Delegates.mongocrypt_init mongocrypt_init;
         internal static readonly Delegates.mongocrypt_destroy mongocrypt_destroy;
@@ -133,9 +136,9 @@ namespace MongoDB.Crypt
         internal static readonly Delegates.mongocrypt_ctx_explicit_encrypt_init mongocrypt_ctx_explicit_encrypt_init;
         internal static readonly Delegates.mongocrypt_ctx_explicit_decrypt_init mongocrypt_ctx_explicit_decrypt_init;
         internal static readonly Delegates.mongocrypt_ctx_datakey_init mongocrypt_ctx_datakey_init;
-        internal static readonly Delegates.mongocrypt_ctx_setopt_schema mongocrypt_ctx_setopt_schema;
         internal static readonly Delegates.mongocrypt_ctx_setopt_masterkey_local mongocrypt_ctx_setopt_masterkey_local;
         internal static readonly Delegates.mongocrypt_ctx_setopt_key_id mongocrypt_ctx_setopt_key_id;
+        internal static readonly Delegates.mongocrypt_ctx_setopt_key_alt_name mongocrypt_ctx_setopt_key_alt_name;
         internal static readonly Delegates.mongocrypt_ctx_setopt_algorithm mongocrypt_ctx_setopt_algorithm;
         internal static readonly Delegates.mongocrypt_ctx_setopt_initialization_vector mongocrypt_ctx_setopt_initialization_vector;
 
@@ -178,6 +181,8 @@ namespace MongoDB.Crypt
             public delegate bool mongocrypt_setopt_kms_provider_aws(MongoCryptSafeHandle handle, [MarshalAs(UnmanagedType.LPStr)]string aws_access_key_id, int aws_access_key_id_len, [MarshalAs(UnmanagedType.LPStr)] string aws_secret_access_key, int aws_secret_access_key_len);
             [return: MarshalAs(UnmanagedType.I1),]
             public delegate bool mongocrypt_setopt_kms_provider_local(MongoCryptSafeHandle handle, BinarySafeHandle key);
+            [return: MarshalAs(UnmanagedType.I1),]
+            public delegate bool mongocrypt_setopt_schema_map(MongoCryptSafeHandle handle, BinarySafeHandle schema);
 
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_init(MongoCryptSafeHandle handle);
@@ -204,7 +209,7 @@ namespace MongoDB.Crypt
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_ctx_status(ContextSafeHandle handle, StatusSafeHandle status);
             [return: MarshalAs(UnmanagedType.I1)]
-            public delegate bool mongocrypt_ctx_encrypt_init(ContextSafeHandle handle, IntPtr ns, int length);
+            public delegate bool mongocrypt_ctx_encrypt_init(ContextSafeHandle handle, IntPtr ns, int length, BinarySafeHandle binary);
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_ctx_decrypt_init(ContextSafeHandle handle, BinarySafeHandle binary);
             [return: MarshalAs(UnmanagedType.I1)]
@@ -214,9 +219,11 @@ namespace MongoDB.Crypt
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_ctx_datakey_init(ContextSafeHandle handle);
             [return: MarshalAs(UnmanagedType.I1)]
-            public delegate bool mongocrypt_ctx_setopt_schema(ContextSafeHandle handle, BinarySafeHandle binary);
+            public delegate bool mongocrypt_ctx_setopt_schema_map(ContextSafeHandle handle, BinarySafeHandle binary);
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_ctx_setopt_masterkey_local(ContextSafeHandle handle);
+            [return: MarshalAs(UnmanagedType.I1)]
+            public delegate bool mongocrypt_ctx_setopt_key_alt_name(ContextSafeHandle handle, BinarySafeHandle binary);
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_ctx_setopt_key_id(ContextSafeHandle handle, BinarySafeHandle binary);
             [return: MarshalAs(UnmanagedType.I1)]

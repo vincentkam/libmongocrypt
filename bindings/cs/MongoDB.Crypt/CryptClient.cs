@@ -58,31 +58,26 @@ namespace MongoDB.Crypt
         /// </summary>
         /// <param name="ns">The namespace of the collection.</param>
         /// <returns>A encryption context</returns>
-        public CryptContext StartEncryptionContext(string ns, byte[] schema)
+        public CryptContext StartEncryptionContext(string ns, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
 
             IntPtr stringPointer = (IntPtr)Marshal.StringToHGlobalAnsi(ns);
 
-            if(schema != null)
+            try
             {
                 unsafe
                 {
-                    fixed (byte* p = schema)
+                    fixed (byte* c = command)
                     {
-                        IntPtr ptr = (IntPtr)p;
-                        using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)schema.Length))
+                        var commandPtr = (IntPtr)c;
+                        using (var pinnedCommand = new PinnedBinary(commandPtr, (uint)command.Length))
                         {
-                            handle.Check(_status, Library.mongocrypt_ctx_setopt_schema(handle, pinned.Handle));
+                            // Let mongocrypt run strlen
+                            handle.Check(_status, Library.mongocrypt_ctx_encrypt_init(handle, stringPointer, -1, pinnedCommand.Handle));
                         }
                     }
                 }
-            }
-
-            try
-            {
-                // Let mongocrypt run strlen
-                handle.Check(_status, Library.mongocrypt_ctx_encrypt_init(handle, stringPointer, -1));
             }
             finally
             {

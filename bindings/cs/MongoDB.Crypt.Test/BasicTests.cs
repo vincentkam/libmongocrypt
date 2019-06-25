@@ -16,8 +16,10 @@
 
 using MongoDB.Bson;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Xunit;
 using System.Text;
 using FluentAssertions;
@@ -36,14 +38,13 @@ namespace MongoDB.Crypt.Test
         
         CryptOptions CreateOptions()
         {
-            return new CryptOptions
-            {
-                KmsCredentials = new AwsKmsCredentials
+            return new CryptOptions(
+                new AwsKmsCredentials
                 {
                     AwsSecretAccessKey = "us-east-1",
                     AwsAccessKeyId = "us-east-1",
                 }
-            };
+            );
         }
 
         AwsKeyId CreateKey()
@@ -55,14 +56,14 @@ namespace MongoDB.Crypt.Test
         public void EncryptQuery()
         {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartEncryptionContext("test.test", null))
+            using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJSONTestFile("cmd.json"))))
             {
                 var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
                 bsonCommand.Should().Equal((ReadJSONTestFile("encrypted-command.json")));
             }
 
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartEncryptionContext("test.test", null))
+            using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJSONTestFile("cmd.json"))))
             {
                 var (state, binarySent, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO);
@@ -70,7 +71,7 @@ namespace MongoDB.Crypt.Test
 
                 (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS);
-                operationSent.Should().Equal(ReadJSONTestFile("json-schema.json"));
+                operationSent.Should().Equal(ReadJSONTestFile("mongocryptd-command.json"));
 
                 (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
@@ -170,7 +171,6 @@ namespace MongoDB.Crypt.Test
 
         private (Binary binarySent, BsonDocument document) ProcessContextToCompletion(CryptContext context)
         {
-            CryptContext.StateCode state;
             BsonDocument document = null;
             Binary binary = null;
 
@@ -264,12 +264,6 @@ namespace MongoDB.Crypt.Test
                     return (CryptContext.StateCode.MONGOCRYPT_CTX_DONE, null, null);
                 }
 
-                case CryptContext.StateCode.MONGOCRYPT_CTX_NOTHING_TO_DO:
-                {
-                    _output.WriteLine("NOTHING TO DO");
-                    return (CryptContext.StateCode.MONGOCRYPT_CTX_DONE, null, null);
-                }
-
                 case CryptContext.StateCode.MONGOCRYPT_CTX_ERROR:
                 {
                     // We expect exceptions are thrown before we get to this state
@@ -280,23 +274,29 @@ namespace MongoDB.Crypt.Test
             throw new NotImplementedException();
         }
 
-        static string FindTestDirectory()
+        static IEnumerable<string> FindTestDirectories()
         {
             // Assume we are child directory of the repo
             string searchPath = Path.Combine("..", "test", "example");
             string cwd = Directory.GetCurrentDirectory();
+            var testDirs = new List<string>();
             for(int i = 0; i < 10; i++)
             {
                 string testPath = Path.Combine(cwd, searchPath);
                 if (Directory.Exists(testPath))
                 {
-                    return testPath;
+                    testDirs.Add(testPath);
                 }
 
                 searchPath = Path.Combine("..", searchPath);
             }
 
-            throw new DirectoryNotFoundException("test/example");
+            if (testDirs.Count == 0)
+            {
+                throw new DirectoryNotFoundException("test/example");
+            }
+
+            return testDirs;
         }
 
 
@@ -304,9 +304,8 @@ namespace MongoDB.Crypt.Test
         {
             // The HTTP tests assume \r\n
             // And git strips \r on Unix machines by default so fix up the files
-            string root = FindTestDirectory();
-            string full = Path.Combine(root, file);
-            string text = File.ReadAllText(full);
+
+            var text = ReadTestFile(file);
 
             StringBuilder builder = new StringBuilder(text.Length);
             for(int i = 0; i < text.Length; i++) {
@@ -319,14 +318,20 @@ namespace MongoDB.Crypt.Test
 
         static BsonDocument ReadJSONTestFile(string file)
         {
-            string root = FindTestDirectory();
-            string full = Path.Combine(root, file);
-            string text = File.ReadAllText(full);
+            var text = ReadTestFile(file);
 
             // Work around C# drivers and C driver have different extended json support
             text = text.Replace("\"$numberLong\"", "$numberLong");
 
             return BsonUtil.FromJSON(text);
+        }
+
+        static string ReadTestFile(string fileName)
+        {
+            return FindTestDirectories()
+                .Select(directory => Path.Combine(directory, fileName))
+                .Select(path => File.Exists(path) ? File.ReadAllText(path) : null)
+                .FirstOrDefault(httpText => httpText != null);
         }
     }
 }
