@@ -56,6 +56,18 @@ namespace MongoDB.Crypt.Test
         public void EncryptQuery()
         {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
+            using (var context =
+                foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJSONTestFile("cmd.json"))))
+            {
+                var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
+                bsonCommand.Should().Equal((ReadJSONTestFile("encrypted-command.json")));
+            }
+        }
+
+        [Fact]
+        public void EncryptQueryStepwise()
+        {
+            using (var foo = CryptClientFactory.Create(CreateOptions()))
             using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJSONTestFile("cmd.json"))))
             {
                 var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
