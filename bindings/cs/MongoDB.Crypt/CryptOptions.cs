@@ -22,7 +22,19 @@ namespace MongoDB.Crypt
     /// </summary>
     public class CryptOptions
     {
-        public IKmsCredentials KmsCredentials { get; set; }
+        public IKmsCredentials KmsCredentials { get; }
+        public byte[] Schema { get; }
+
+        public CryptOptions(IKmsCredentials kmsCredentials)
+        {
+            KmsCredentials = kmsCredentials;
+        }
+
+        public CryptOptions(IKmsCredentials kmsCredentials, byte[] schema)
+        {
+            KmsCredentials = kmsCredentials;
+            Schema = schema;
+        }
 
         // TODO: - add configurable logging support
     }
