@@ -212,7 +212,6 @@ namespace drivertest
                             };
 
                             var reply = db.ListCollections(opts);
-                            //var reply = _db.RunCommand(doc);
 
                             var replyDocs = reply.ToList<BsonDocument>();
                             Console.WriteLine("ListCollections Reply: " + replyDocs);
@@ -228,21 +227,13 @@ namespace drivertest
                         }
                     case CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS:
                         {
-                            // new change: will likely feed command into context and get the concatted command
-                            // back with schema
                             var binary = context.GetOperation();
-                            var schema = BsonUtil.ToDocument(binary);
-
-                            Console.WriteLine("MongoCryptD Query: " + schema);
+                            var commandWithSchema = BsonUtil.ToDocument(binary);
+                            Console.WriteLine("MongoCryptD Query: " + commandWithSchema);
 
                             var cryptDB = _clientCryptD.GetDatabase(db.DatabaseNamespace.DatabaseName);
 
-                            var doc = BsonUtil.Concat(cmd, new BsonDocument { { "jsonSchema", schema } });
-
-                            Console.WriteLine("MongoCryptD Query: " + doc);
-
-                            var reply = cryptDB.RunCommand(new BsonDocumentCommand<BsonDocument>(doc));
-
+                            var reply = cryptDB.RunCommand(new BsonDocumentCommand<BsonDocument>(commandWithSchema));
                             Console.WriteLine("MongoCryptD Reply: " + reply);
 
                             context.Feed(BsonUtil.ToBytes(reply));
@@ -342,7 +333,6 @@ namespace drivertest
                                     { "keyId" , new BsonArray( new BsonValue[] { keyID } ) },
                                     {  "bsonType" , "string"},
                                     { "algorithm" , "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic" },
-                                    { "initializationVector" , new byte[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 } }
                                     }
                                 }
                             }
