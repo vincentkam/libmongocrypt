@@ -57,10 +57,10 @@ namespace MongoDB.Crypt.Test
         {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
             using (var context =
-                foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJSONTestFile("cmd.json"))))
+                foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
             {
-                var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
-                bsonCommand.Should().Equal((ReadJSONTestFile("encrypted-command.json")));
+                var (_, bsonCommand) = ProcessContextToCompletion(context);
+                bsonCommand.Should().Equal((ReadJsonTestFile("encrypted-command.json")));
             }
         }
 
@@ -68,73 +68,78 @@ namespace MongoDB.Crypt.Test
         public void EncryptQueryStepwise()
         {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJSONTestFile("cmd.json"))))
+            using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
             {
-                var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
-                bsonCommand.Should().Equal((ReadJSONTestFile("encrypted-command.json")));
+                var (_, bsonCommand) = ProcessContextToCompletion(context);
+                bsonCommand.Should().Equal((ReadJsonTestFile("encrypted-command.json")));
             }
 
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJSONTestFile("cmd.json"))))
+            using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
             {
-                var (state, binarySent, operationSent) = ProcessState(context);
+                var (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO);
-                operationSent.Should().Equal((ReadJSONTestFile("list-collections-filter.json")));
+                operationSent.Should().Equal((ReadJsonTestFile("list-collections-filter.json")));
 
                 (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS);
-                operationSent.Should().Equal(ReadJSONTestFile("mongocryptd-command.json"));
+                operationSent.Should().Equal(ReadJsonTestFile("mongocryptd-command.json"));
 
                 (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
-                operationSent.Should().Equal(ReadJSONTestFile("key-filter.json"));
+                operationSent.Should().Equal(ReadJsonTestFile("key-filter.json"));
 
-                (state, binarySent, _) = ProcessState(context);
+                (state, _, _) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS);
                 // kms fluent assertions inside ProcessState()
 
                 (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
-                operationSent.Should().Equal((ReadJSONTestFile("encrypted-command.json")));
+                operationSent.Should().Equal((ReadJsonTestFile("encrypted-command.json")));
             }
         }
+
 
         [Fact]
         public void DecryptQuery()
         {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJSONTestFile("encrypted-document.json"))))
+            using (var context =
+                foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJsonTestFile("encrypted-command-reply.json"))))
             {
-                var (binaryCommand, bsonCommand) = ProcessContextToCompletion(context);
-                bsonCommand.Should().Equal(new BsonDocument("ssn", "457-55-5462"));
+                var (_, bsonCommand) = ProcessContextToCompletion(context);
+                bsonCommand.Should().Equal(ReadJsonTestFile("command-reply.json"));
             }
+        }
 
+        [Fact]
+        public void DecryptQueryStepwise()
+        {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJSONTestFile("encrypted-document.json"))))
+            using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJsonTestFile("encrypted-command-reply.json"))))
             {
-                var (state, binaryProduced, operationProduced) = ProcessState(context);
+                var (state, _, operationProduced) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
-                operationProduced.Should().Equal(ReadJSONTestFile("key-filter.json"));
+                operationProduced.Should().Equal(ReadJsonTestFile("key-filter.json"));
 
-                (state, binaryProduced, _) = ProcessState(context);
+                (state, _, _) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS);
                 // kms fluent assertions inside ProcessState()
 
                 (state, _, operationProduced) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
-                var decryptedDocument = operationProduced; // todo: fix naming problem
-                operationProduced.Should().Equal(new BsonDocument("ssn", "457-55-5462"));
+                operationProduced.Should().Equal(ReadJsonTestFile("command-reply.json"));
 
-                (state, _, operationProduced) = ProcessState(context);
+                (state, _, _) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
             }
         }
 
         [Fact]
-        public void EncryptBadBSON()
+        public void EncryptBadBson()
         {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartEncryptionContext("test.test", null))
+            using (var context = foo.StartEncryptionContext("test.test",  command: new byte[] {0x2, 0x3}))
             {
                 var binary = context.GetOperation();
                 var doc = BsonUtil.ToDocument(binary);
@@ -151,7 +156,7 @@ namespace MongoDB.Crypt.Test
         [Fact]
         public void EncryptExplicit()
         {
-            var keyDoc = ReadJSONTestFile("key-document.json");
+            var keyDoc = ReadJsonTestFile("key-document.json");
             Guid key = keyDoc["_id"].AsGuid;
 
 
@@ -211,7 +216,7 @@ namespace MongoDB.Crypt.Test
                     var binary = context.GetOperation();
                     var doc = BsonUtil.ToDocument(binary);
                     _output.WriteLine("ListCollections: " + doc);
-                    var reply = ReadJSONTestFile("collection-info.json");
+                    var reply = ReadJsonTestFile("collection-info.json");
                     _output.WriteLine("Reply:" + reply);
                     context.Feed(BsonUtil.ToBytes(reply));
                     context.MarkDone();
@@ -223,7 +228,7 @@ namespace MongoDB.Crypt.Test
                     var binary = context.GetOperation();
                     var doc = BsonUtil.ToDocument(binary);
                     _output.WriteLine("Markings: " + doc);
-                    var reply = ReadJSONTestFile("mongocryptd-reply.json");
+                    var reply = ReadJsonTestFile("mongocryptd-reply.json");
                     _output.WriteLine("Reply:" + reply);
                     context.Feed(BsonUtil.ToBytes(reply));
                     context.MarkDone();
@@ -235,7 +240,7 @@ namespace MongoDB.Crypt.Test
                     var binary = context.GetOperation();
                     var doc = BsonUtil.ToDocument(binary);
                     _output.WriteLine("Key Document: " + doc);
-                    var reply = ReadJSONTestFile("key-document.json");
+                    var reply = ReadJsonTestFile("key-document.json");
                     _output.WriteLine("Reply:" + reply);
                     context.Feed(BsonUtil.ToBytes(reply));
                     context.MarkDone();
@@ -328,7 +333,7 @@ namespace MongoDB.Crypt.Test
             return builder.ToString();
         }
 
-        static BsonDocument ReadJSONTestFile(string file)
+        static BsonDocument ReadJsonTestFile(string file)
         {
             var text = ReadTestFile(file);
 
