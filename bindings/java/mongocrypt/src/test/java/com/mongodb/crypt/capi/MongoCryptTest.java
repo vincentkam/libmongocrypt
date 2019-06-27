@@ -137,7 +137,7 @@ public class MongoCryptTest {
 
         assertEquals(State.READY, encryptor.getState());
 
-        BsonDocument encryptedDocument = encryptor.finish();
+        BsonDocument encryptedDocument = encryptor.finish(); // look here
         assertEquals(State.DONE, encryptor.getState());
         assertEquals(getResourceAsDocument("encrypted-value.json"), encryptedDocument);
 

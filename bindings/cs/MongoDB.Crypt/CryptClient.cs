@@ -57,7 +57,8 @@ namespace MongoDB.Crypt
         /// Starts the encryption context.
         /// </summary>
         /// <param name="ns">The namespace of the collection.</param>
-        /// <returns>A encryption context</returns>
+        /// <param name="command">The command.</param>
+        /// <returns>A encryption context.</returns>
         public CryptContext StartEncryptionContext(string ns, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
@@ -90,8 +91,12 @@ namespace MongoDB.Crypt
         /// <summary>
         /// Starts an explicit encryption context.
         /// </summary>
-        /// <returns>A encryption context</returns>
-        public CryptContext StartExplicitEncryptionContext(Guid key, Alogrithm algo, byte[] buffer, byte[] initializationVector)
+        /// <param name="key">The key.</param>
+        /// <param name="algorithm">The algorithm.</param>
+        /// <param name="command">The BSON command.</param>
+        /// <param name="initializationVector">The initialization vector.</param>
+        /// <returns>A encryption context. </returns>
+        public CryptContext StartExplicitEncryptionContext(Guid key, Alogrithm algorithm, byte[] command, byte[] initializationVector)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
             
@@ -108,7 +113,7 @@ namespace MongoDB.Crypt
                 }
             }
 
-            handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.AlgorithmToString(algo), -1));
+            handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.AlgorithmToString(algorithm), -1));
 
             if (initializationVector != null)
             {
@@ -126,10 +131,10 @@ namespace MongoDB.Crypt
             }
             unsafe
             {
-                fixed (byte* p = buffer)
+                fixed (byte* p = command)
                 {
                     IntPtr ptr = (IntPtr)p;
-                    using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)buffer.Length))
+                    using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)command.Length))
                     {
                         handle.Check(_status, Library.mongocrypt_ctx_explicit_encrypt_init(handle, pinned.Handle));
                     }
