@@ -148,7 +148,6 @@ namespace MongoDB.Crypt
         /// Starts the decryption context.
         /// </summary>
         /// <param name="buffer">The bson document to decrypt.</param>
-        /// <param name="keyId">The key identifier.</param>
         /// <returns>A decryption context</returns>
         public CryptContext StartDecryptionContext(byte[] buffer)
         {
