@@ -132,15 +132,12 @@ namespace MongoDB.Crypt.Test
         public void EncryptBadBson()
         {
             using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartEncryptionContext("test.test",  command: new byte[] {0x2, 0x3}))
             {
-                var binary = context.GetOperation();
-                var doc = BsonUtil.ToDocument(binary);
-                _output.WriteLine("ListCollections: " + doc);
+                Func<CryptContext> startEncryptionContext = () =>
+                    foo.StartEncryptionContext("test.test",  command: new byte[] {0x1, 0x2, 0x3});
 
                 // Ensure if we encrypt non-sense, it throws an exception demonstrating our exception code is good
-                Action act = () => context.Feed(new byte[] {0x1, 0x2, 0x3});
-                var exception = Record.Exception(act);
+                var exception = Record.Exception(startEncryptionContext);
 
                 exception.Should().BeOfType<CryptException>();
             }
