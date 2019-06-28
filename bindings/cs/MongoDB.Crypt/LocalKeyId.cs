@@ -19,15 +19,15 @@ namespace MongoDB.Crypt
     /// <summary>Contains all the information needed to describe a Local KMS CMK.</summary>
     public class LocalKeyId : IKmsKeyId, IInternalKmsKeyId
     {
-        public KmsType KeyType => KmsType.Local;
-
         /// <summary>
-        /// Gets or sets the key.
+        /// Creates an <see cref="LocalKeyId"/> class.
         /// </summary>
-        /// <value>
-        /// The key.
-        /// </value>
-        public byte[] Key { get; set; }
+        /// <param name="key">The key.</param>
+        public LocalKeyId()
+        {
+        }
+
+        public KmsType KeyType => KmsType.Local;
 
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
         {

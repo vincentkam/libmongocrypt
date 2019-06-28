@@ -26,20 +26,30 @@ namespace MongoDB.Crypt
         public KmsType KmsType => KmsType.Aws;
 
         /// <summary>
-        /// Gets or sets the aws secret access key.
+        /// Creates an <see cref="AwsKmsCredentials"/> class.
+        /// </summary>
+        /// <param name="awsSecretAccessKey">The awsSecretAccessKey.</param>
+        /// <param name="awsAccessKeyId">The awsAccessKeyId.</param>
+        public AwsKmsCredentials(string awsSecretAccessKey, string awsAccessKeyId)
+        {
+            AwsSecretAccessKey = awsSecretAccessKey;
+            AwsAccessKeyId = awsAccessKeyId;
+        }
+        /// <summary>
+        /// Gets the aws secret access key.
         /// </summary>
         /// <value>
         /// The aws secret access key.
         /// </value>
-        public string AwsSecretAccessKey { get; set; }
+        public string AwsSecretAccessKey { get; }
 
         /// <summary>
-        /// Gets or sets the aws access key identifier.
+        /// Gets the aws access key identifier.
         /// </summary>
         /// <value>
         /// The aws access key identifier.
         /// </value>
-        public string AwsAccessKeyId { get; set; }
+        public string AwsAccessKeyId { get; }
 
         void IInternalKmsCredentials.SetCredentials(MongoCryptSafeHandle handle, Status status)
         {
