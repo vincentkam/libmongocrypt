@@ -24,17 +24,28 @@ namespace MongoDB.Crypt
     {
         public KmsType KeyType => KmsType.Aws;
 
-        /// <summary>Gets or sets the region.</summary>
+        /// <summary>
+        /// Creates an <see cref="AwsKeyId"/> class.
+        /// </summary>
+        /// <param name="customerMasterKey">The customerMasterKey.</param>
+        /// <param name="region">The region.</param>
+        public AwsKeyId(string customerMasterKey, string region)
+        {
+            Region = region;
+            CustomerMasterKey = customerMasterKey;
+        }
+
+        /// <summary>Gets the region.</summary>
         /// <value>The region.</value>
-        public string Region { get; set; }
+        public string Region { get; }
 
         /// <summary>
-        /// Gets or sets the customer master key.
+        /// Gets the customer master key.
         /// </summary>
         /// <value>
         /// The customer master key.
         /// </value>
-        public string CustomerMasterKey { get; set; }
+        public string CustomerMasterKey { get; }
 
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
         {

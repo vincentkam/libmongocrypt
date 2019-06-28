@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2019-present MongoDB, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,17 +39,15 @@ namespace MongoDB.Crypt.Test
         CryptOptions CreateOptions()
         {
             return new CryptOptions(
-                new AwsKmsCredentials
-                {
-                    AwsSecretAccessKey = "us-east-1",
-                    AwsAccessKeyId = "us-east-1",
-                }
+                new AwsKmsCredentials(
+                    awsSecretAccessKey: "us-east-1",
+                    awsAccessKeyId: "us-east-1")
             );
         }
 
         AwsKeyId CreateKey()
         {
-            return new AwsKeyId() { CustomerMasterKey = "cmk", Region = "us-east-1" };
+            return new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1");
         }
 
         [Fact]
@@ -96,9 +94,9 @@ namespace MongoDB.Crypt.Test
         [Fact]
         public void DecryptQuery()
         {
-            using (var foo = CryptClientFactory.Create(CreateOptions()))
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
             using (var context =
-                foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJsonTestFile("encrypted-command-reply.json"))))
+                cryptClient.StartDecryptionContext(BsonUtil.ToBytes(ReadJsonTestFile("encrypted-command-reply.json"))))
             {
                 var (_, bsonCommand) = ProcessContextToCompletion(context);
                 bsonCommand.Should().Equal(ReadJsonTestFile("command-reply.json"));
@@ -163,7 +161,6 @@ namespace MongoDB.Crypt.Test
             {
                 (encryptedResult, _) = ProcessContextToCompletion(context);
             }
-
 
             using (var foo = CryptClientFactory.Create(CreateOptions()))
             using (var context = foo.StartExplicitDecryptionContext(encryptedResult.ToArray()))

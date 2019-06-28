@@ -23,7 +23,7 @@ namespace MongoDB.Crypt
     /// </summary>
     public class CryptClientFactory
     {
-        /// <summary>Creates the specified options.</summary>
+        /// <summary>Creates a CryptClient with the specified options.</summary>
         /// <param name="options">The options.</param>
         /// <returns>A CryptClient</returns>
         public static CryptClient Create(CryptOptions options)
