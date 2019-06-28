@@ -376,17 +376,14 @@ namespace drivertest
 
             var controller = new MongoCryptDController(cryptDUrl, collKeyVault, kmsURL);
 
-            AwsKeyId awsKeyId = new AwsKeyId()
-            {
-                CustomerMasterKey = "arn:aws:kms:us-east-1:579766882180:key/0689eb07-d588-4bbf-a83e-42157a92576b",
-                Region = "us-east-1",
-            };
+            var awsKeyId = new AwsKeyId(
+                customerMasterKey: "arn:aws:kms:us-east-1:579766882180:key/0689eb07-d588-4bbf-a83e-42157a92576b",
+                region: "us-east-1");
+            ;
 
-            AwsKmsCredentials kmsCredentials = new AwsKmsCredentials()
-            {
-                AwsSecretAccessKey = GetEnvironmenVariabletOrValue("AWS_SECRET_ACCESS_KEY", "us-east-1"),
-                AwsAccessKeyId = GetEnvironmenVariabletOrValue("AWS_ACCESS_KEY_ID", "us-east-1"),
-            };
+            AwsKmsCredentials kmsCredentials = new AwsKmsCredentials(
+                awsSecretAccessKey: GetEnvironmenVariabletOrValue("AWS_SECRET_ACCESS_KEY", "us-east-1"),
+                awsAccessKeyId: GetEnvironmenVariabletOrValue("AWS_ACCESS_KEY_ID", "us-east-1"));
 
 
             Guid keyID = controller.GenerateKey(kmsCredentials, awsKeyId);

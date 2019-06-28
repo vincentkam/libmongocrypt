@@ -25,6 +25,14 @@ namespace MongoDB.Crypt
     /// <seealso cref="MongoDB.Crypt.IInternalKmsCredentials" />
     public class LocalKmsCredentials : IKmsCredentials, IInternalKmsCredentials
     {
+        /// <summary>
+        /// Creates an <see cref="LocalKmsCredentials"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        public LocalKmsCredentials(byte[] key)
+        {
+            Key = key;
+        }
         public KmsType KmsType => KmsType.Local;
 
         /// <summary>
@@ -33,7 +41,7 @@ namespace MongoDB.Crypt
         /// <value>
         /// The key.
         /// </value>
-        public byte[] Key { get; set; }
+        public byte[] Key { get; }
 
         void IInternalKmsCredentials.SetCredentials(MongoCryptSafeHandle handle, Status status)
         {
