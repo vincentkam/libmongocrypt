@@ -105,8 +105,8 @@ namespace drivertest
 
             BsonDocument key = null;
 
-            using (var foo = CryptClientFactory.Create(options))
-            using (var context = foo.StartCreateDataKeyContext(kmsKeyId))
+            using (var cryptClient = CryptClientFactory.Create(options))
+            using (var context = cryptClient.StartCreateDataKeyContext(kmsKeyId))
             {
                 key = ProcessState(context, _keyVault.Database, null);
             }
@@ -120,8 +120,8 @@ namespace drivertest
         {
             CryptOptions options = new CryptOptions(credentials);
 
-            using (var foo = CryptClientFactory.Create(options))
-            using (var context = foo.StartEncryptionContext(coll.CollectionNamespace.FullName,  command: BsonUtil.ToBytes(cmd)))
+            using (var cryptClient = CryptClientFactory.Create(options))
+            using (var context = cryptClient.StartEncryptionContext(coll.CollectionNamespace.FullName,  command: BsonUtil.ToBytes(cmd)))
             {
                 return ProcessState(context, coll.Database, cmd);
 
@@ -132,8 +132,8 @@ namespace drivertest
         {
             CryptOptions options = new CryptOptions(credentials);
 
-            using (var foo = CryptClientFactory.Create(options))
-            using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(doc)))
+            using (var cryptClient = CryptClientFactory.Create(options))
+            using (var context = cryptClient.StartDecryptionContext(BsonUtil.ToBytes(doc)))
             {
                 return ProcessState(context, db, null);
 
