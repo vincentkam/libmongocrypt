@@ -169,8 +169,27 @@ namespace MongoDB.Crypt.Test
 
                 decryptedResult.ToArray().Should().Equal(testData);
             }
+        }
 
+        [Fact]
+        public void TestLocalKeyCreation()
+        {
 
+            var key = new LocalKmsCredentials(new byte[96]);
+            var keyId = new LocalKeyId();
+            var cryptOptions = new CryptOptions(key);
+
+            using (var cryptClient = CryptClientFactory.Create(cryptOptions))
+            using (var context =
+                cryptClient.StartCreateDataKeyContext(keyId))
+            {
+                var (state, _, dataKeyDocument) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
+                dataKeyDocument.Should().NotBeNull();
+
+                (state, _, _) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
+            }
         }
 
         private (Binary binarySent, BsonDocument document) ProcessContextToCompletion(CryptContext context)
