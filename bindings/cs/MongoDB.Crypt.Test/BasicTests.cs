@@ -53,9 +53,9 @@ namespace MongoDB.Crypt.Test
         [Fact]
         public void EncryptQuery()
         {
-            using (var foo = CryptClientFactory.Create(CreateOptions()))
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
             using (var context =
-                foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
+                cryptClient.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
             {
                 var (_, bsonCommand) = ProcessContextToCompletion(context);
                 bsonCommand.Should().Equal((ReadJsonTestFile("encrypted-command.json")));
@@ -65,8 +65,8 @@ namespace MongoDB.Crypt.Test
         [Fact]
         public void EncryptQueryStepwise()
         {
-            using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
+            using (var context = cryptClient.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
             {
                 var (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO);
@@ -106,8 +106,8 @@ namespace MongoDB.Crypt.Test
         [Fact]
         public void DecryptQueryStepwise()
         {
-            using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartDecryptionContext(BsonUtil.ToBytes(ReadJsonTestFile("encrypted-command-reply.json"))))
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
+            using (var context = cryptClient.StartDecryptionContext(BsonUtil.ToBytes(ReadJsonTestFile("encrypted-command-reply.json"))))
             {
                 var (state, _, operationProduced) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
@@ -129,10 +129,10 @@ namespace MongoDB.Crypt.Test
         [Fact]
         public void EncryptBadBson()
         {
-            using (var foo = CryptClientFactory.Create(CreateOptions()))
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
             {
                 Func<CryptContext> startEncryptionContext = () =>
-                    foo.StartEncryptionContext("test.test",  command: new byte[] {0x1, 0x2, 0x3});
+                    cryptClient.StartEncryptionContext("test.test",  command: new byte[] {0x1, 0x2, 0x3});
 
                 // Ensure if we encrypt non-sense, it throws an exception demonstrating our exception code is good
                 var exception = Record.Exception(startEncryptionContext);
@@ -156,14 +156,14 @@ namespace MongoDB.Crypt.Test
             var testData = BsonUtil.ToBytes(doc);
 
             Binary encryptedResult;
-            using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartExplicitEncryptionContext(key, Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData, null))
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
+            using (var context = cryptClient.StartExplicitEncryptionContext(key, Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData, null))
             {
                 (encryptedResult, _) = ProcessContextToCompletion(context);
             }
 
-            using (var foo = CryptClientFactory.Create(CreateOptions()))
-            using (var context = foo.StartExplicitDecryptionContext(encryptedResult.ToArray()))
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
+            using (var context = cryptClient.StartExplicitDecryptionContext(encryptedResult.ToArray()))
             {
                 var (decryptedResult, _) = ProcessContextToCompletion(context);
 
