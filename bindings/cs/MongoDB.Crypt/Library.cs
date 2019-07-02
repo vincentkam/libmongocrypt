@@ -226,8 +226,6 @@ namespace MongoDB.Crypt
             public delegate bool mongocrypt_ctx_setopt_key_id(ContextSafeHandle handle, BinarySafeHandle binary);
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_ctx_setopt_algorithm(ContextSafeHandle handle, [MarshalAs(UnmanagedType.LPStr)]string algorithm, int length);
-            [return: MarshalAs(UnmanagedType.I1)]
-            public delegate bool mongocrypt_ctx_setopt_initialization_vector(ContextSafeHandle handle, BinarySafeHandle binary);
             public delegate CryptContext.StateCode mongocrypt_ctx_state(ContextSafeHandle handle);
             [return: MarshalAs(UnmanagedType.I1)]
             public delegate bool mongocrypt_ctx_mongo_op(ContextSafeHandle handle, BinarySafeHandle bsonOp);
