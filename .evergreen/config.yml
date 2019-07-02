@@ -372,6 +372,7 @@ buildvariants:
   - clang-tidy
   - build-and-test-and-upload
   - build-and-test-shared-bson
+  - build-and-test-asan
   - build-and-test-java
 - name: debian92
   display_name: "Debian 9.2"
