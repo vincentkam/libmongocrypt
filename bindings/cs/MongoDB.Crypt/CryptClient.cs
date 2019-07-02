@@ -94,9 +94,8 @@ namespace MongoDB.Crypt
         /// <param name="key">The key.</param>
         /// <param name="algorithm">The algorithm.</param>
         /// <param name="command">The BSON command.</param>
-        /// <param name="initializationVector">The initialization vector.</param>
         /// <returns>A encryption context. </returns>
-        public CryptContext StartExplicitEncryptionContext(Guid key, Alogrithm algorithm, byte[] command, byte[] initializationVector)
+        public CryptContext StartExplicitEncryptionContext(Guid key, Alogrithm algorithm, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
             
@@ -115,20 +114,6 @@ namespace MongoDB.Crypt
 
             handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.AlgorithmToString(algorithm), -1));
 
-            if (initializationVector != null)
-            {
-                unsafe
-                {
-                    fixed (byte* p = initializationVector)
-                    {
-                        IntPtr ptr = (IntPtr)p;
-                        using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)initializationVector.Length))
-                        {
-                            handle.Check(_status, Library.mongocrypt_ctx_setopt_initialization_vector(handle, pinned.Handle));
-                        }
-                    }
-                }
-            }
             unsafe
             {
                 fixed (byte* p = command)
