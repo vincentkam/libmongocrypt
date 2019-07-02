@@ -172,7 +172,75 @@ namespace MongoDB.Crypt.Test
         }
 
         [Fact]
+        public void EncryptExplicitStepwise()
+        {
+            var keyDoc = ReadJsonTestFile("key-document.json");
+            var key = keyDoc["_id"].AsGuid;
+
+            var doc = new BsonDocument("v", "hello");
+
+
+            var testData = BsonUtil.ToBytes(doc);
+
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
+            {
+                Binary encryptedResult;
+                using (var context = cryptClient.StartExplicitEncryptionContext(
+                    key: key,
+                    algorithm: Alogrithm.AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic,
+                    command: testData,
+                    initializationVector: null))
+                {
+                    var (state, binaryProduced, operationProduced) = ProcessState(context);
+                    state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
+                    operationProduced.Should().Equal(ReadJsonTestFile("key-filter.json"));
+
+                    (state, _, _) = ProcessState(context);
+                    state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS);
+                    // kms fluent assertions inside ProcessState()
+
+                    (state, binaryProduced, operationProduced) = ProcessState(context);
+                    state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
+                    operationProduced.Should().Equal(ReadJsonTestFile("encrypted-value.json"));
+                    encryptedResult = binaryProduced;
+
+                    (state, _, _) = ProcessState(context);
+                    state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
+
+                }
+
+                using (var context = cryptClient.StartExplicitDecryptionContext(encryptedResult.ToArray()))
+                {
+                    var (state, decryptedBinary, _) = ProcessState(context);
+                    state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
+                    decryptedBinary.ToArray().Should().Equal(testData);
+
+                    (state, _, _) = ProcessState(context);
+                    state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
+                }
+            }
+        }
+
+        [Fact]
         public void TestLocalKeyCreation()
+        {
+
+            var key = new LocalKmsCredentials(new byte[96]);
+            var keyId = new LocalKeyId();
+            var cryptOptions = new CryptOptions(key);
+
+            using (var cryptClient = CryptClientFactory.Create(cryptOptions))
+            using (var context =
+                cryptClient.StartCreateDataKeyContext(keyId))
+            {
+                var (_, dataKeyDocument) = ProcessContextToCompletion(context);
+                dataKeyDocument.Should().NotBeNull();
+            }
+        }
+
+
+        [Fact]
+        public void TestLocalKeyCreationStepwise()
         {
 
             var key = new LocalKmsCredentials(new byte[96]);
