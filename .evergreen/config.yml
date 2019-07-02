@@ -70,7 +70,7 @@ functions:
         bucket: mciuploads
         extract_to: all/${variant_name}
 
-"build csharp and test":
+  "build csharp and test":
     - command: "shell.exec"
       params:
         script: |-
