@@ -61,7 +61,6 @@ namespace MongoDB.Crypt
             mongocrypt_ctx_setopt_key_id = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_key_id>("mongocrypt_ctx_setopt_key_id");
 
             mongocrypt_ctx_setopt_algorithm = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_algorithm>("mongocrypt_ctx_setopt_algorithm");
-            // mongocrypt_ctx_setopt_initialization_vector = loader.GetFunction<Delegates.mongocrypt_ctx_setopt_initialization_vector>("mongocrypt_ctx_setopt_initialization_vector");
             mongocrypt_ctx_status = loader.GetFunction<Delegates.mongocrypt_ctx_status>("mongocrypt_ctx_status");
             mongocrypt_ctx_encrypt_init = loader.GetFunction<Delegates.mongocrypt_ctx_encrypt_init>("mongocrypt_ctx_encrypt_init");
             mongocrypt_ctx_decrypt_init = loader.GetFunction<Delegates.mongocrypt_ctx_decrypt_init>("mongocrypt_ctx_decrypt_init");
@@ -140,7 +139,6 @@ namespace MongoDB.Crypt
         internal static readonly Delegates.mongocrypt_ctx_setopt_key_id mongocrypt_ctx_setopt_key_id;
         internal static readonly Delegates.mongocrypt_ctx_setopt_key_alt_name mongocrypt_ctx_setopt_key_alt_name;
         internal static readonly Delegates.mongocrypt_ctx_setopt_algorithm mongocrypt_ctx_setopt_algorithm;
-        internal static readonly Delegates.mongocrypt_ctx_setopt_initialization_vector mongocrypt_ctx_setopt_initialization_vector;
 
         internal static readonly Delegates.mongocrypt_ctx_state mongocrypt_ctx_state;
         internal static readonly Delegates.mongocrypt_ctx_mongo_op mongocrypt_ctx_mongo_op;
