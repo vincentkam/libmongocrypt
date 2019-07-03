@@ -121,7 +121,7 @@ namespace drivertest
             CryptOptions options = new CryptOptions(credentials);
 
             using (var cryptClient = CryptClientFactory.Create(options))
-            using (var context = cryptClient.StartEncryptionContext(coll.CollectionNamespace.FullName,  command: BsonUtil.ToBytes(cmd)))
+            using (var context = cryptClient.StartEncryptionContext(coll.Database.DatabaseNamespace.DatabaseName,  command: BsonUtil.ToBytes(cmd)))
             {
                 return ProcessState(context, coll.Database, cmd);
 

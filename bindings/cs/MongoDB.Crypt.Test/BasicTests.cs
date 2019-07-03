@@ -55,7 +55,7 @@ namespace MongoDB.Crypt.Test
         {
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
             using (var context =
-                cryptClient.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
+                cryptClient.StartEncryptionContext("test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
             {
                 var (_, bsonCommand) = ProcessContextToCompletion(context);
                 bsonCommand.Should().Equal((ReadJsonTestFile("encrypted-command.json")));
@@ -66,7 +66,7 @@ namespace MongoDB.Crypt.Test
         public void EncryptQueryStepwise()
         {
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
-            using (var context = cryptClient.StartEncryptionContext("test.test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
+            using (var context = cryptClient.StartEncryptionContext("test", command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
             {
                 var (state, _, operationSent) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_COLLINFO);
@@ -132,7 +132,7 @@ namespace MongoDB.Crypt.Test
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
             {
                 Func<CryptContext> startEncryptionContext = () =>
-                    cryptClient.StartEncryptionContext("test.test",  command: new byte[] {0x1, 0x2, 0x3});
+                    cryptClient.StartEncryptionContext("test",  command: new byte[] {0x1, 0x2, 0x3});
 
                 // Ensure if we encrypt non-sense, it throws an exception demonstrating our exception code is good
                 var exception = Record.Exception(startEncryptionContext);
