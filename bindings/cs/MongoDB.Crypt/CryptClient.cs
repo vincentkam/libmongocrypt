@@ -56,14 +56,14 @@ namespace MongoDB.Crypt
         /// <summary>
         /// Starts the encryption context.
         /// </summary>
-        /// <param name="ns">The namespace of the collection.</param>
+        /// <param name="db">The database of the collection.</param>
         /// <param name="command">The command.</param>
         /// <returns>A encryption context.</returns>
-        public CryptContext StartEncryptionContext(string ns, byte[] command)
+        public CryptContext StartEncryptionContext(string db, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
 
-            IntPtr stringPointer = (IntPtr)Marshal.StringToHGlobalAnsi(ns);
+            IntPtr stringPointer = (IntPtr)Marshal.StringToHGlobalAnsi(db);
 
             try
             {
