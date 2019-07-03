@@ -130,6 +130,45 @@ namespace MongoDB.Crypt
         }
 
         /// <summary>
+        /// Starts an explicit encryption context.
+        /// </summary>
+        /// <param name="keyAltName">The alternative key name.</param>
+        /// <param name="algorithm">The algorithm.</param>
+        /// <param name="command">The BSON command.</param>
+        /// <returns>A encryption context. </returns>
+        public CryptContext StartExplicitEncryptionContext(byte[] keyAltName, Alogrithm algorithm, byte[] command)
+        {
+            ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
+            unsafe
+            {
+                fixed (byte* p = keyAltName)
+                {
+                    IntPtr ptr = (IntPtr)p;
+                    using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)keyAltName.Length))
+                    {
+                        handle.Check(_status, Library.mongocrypt_ctx_setopt_key_alt_name(handle, pinned.Handle));
+                    }
+                }
+            }
+
+            handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.AlgorithmToString(algorithm), -1));
+
+            unsafe
+            {
+                fixed (byte* p = command)
+                {
+                    IntPtr ptr = (IntPtr)p;
+                    using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)command.Length))
+                    {
+                        handle.Check(_status, Library.mongocrypt_ctx_explicit_encrypt_init(handle, pinned.Handle));
+                    }
+                }
+            }
+
+            return new CryptContext(handle);
+        }
+
+        /// <summary>
         /// Starts the decryption context.
         /// </summary>
         /// <param name="buffer">The bson document to decrypt.</param>
