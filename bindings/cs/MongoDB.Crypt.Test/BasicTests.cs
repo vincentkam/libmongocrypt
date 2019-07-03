@@ -90,6 +90,45 @@ namespace MongoDB.Crypt.Test
             }
         }
 
+        [Fact]
+        public void EncryptQueryWithSchemaStepwise()
+        {
+            var listCollectionsReply = ReadJsonTestFile("collection-info.json");
+            var schema = new BsonDocument("test.test", listCollectionsReply["options"]["validator"]["$jsonSchema"]);
+
+            var options =  new CryptOptions(
+                new AwsKmsCredentials(
+                    awsSecretAccessKey: "us-east-1",
+                    awsAccessKeyId: "us-east-1"),
+                BsonUtil.ToBytes(schema)
+            );
+            using (var cryptClient = CryptClientFactory.Create(options))
+            using (var context =
+                cryptClient.StartEncryptionContext(
+                    db:"test",
+                    command: BsonUtil.ToBytes(ReadJsonTestFile("cmd.json"))))
+            {
+
+                var (state, _, operationSent) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_MARKINGS);
+                var mongoCryptdCommand = ReadJsonTestFile("mongocryptd-command.json");
+                mongoCryptdCommand["isRemoteSchema"] = false;
+                operationSent.Should().Equal(mongoCryptdCommand);
+
+                (state, _, operationSent) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_MONGO_KEYS);
+                operationSent.Should().Equal(ReadJsonTestFile("key-filter.json"));
+
+                (state, _, _) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS);
+                // kms fluent assertions inside ProcessState()
+
+                (state, _, operationSent) = ProcessState(context);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
+                operationSent.Should().Equal((ReadJsonTestFile("encrypted-command.json")));
+
+            }
+        }
 
         [Fact]
         public void DecryptQuery()
