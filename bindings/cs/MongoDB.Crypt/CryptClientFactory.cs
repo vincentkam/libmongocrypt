@@ -36,8 +36,6 @@ namespace MongoDB.Crypt
             kmsCredentials.SetCredentials(handle,status);
 
             // TODO - set logger
-
-            Library.mongocrypt_init(handle);
             if (options.Schema != null)
             {
                 unsafe
@@ -52,6 +50,7 @@ namespace MongoDB.Crypt
                     }
                 }
             }
+            Library.mongocrypt_init(handle);
 
             return new CryptClient(handle, status);
         }
