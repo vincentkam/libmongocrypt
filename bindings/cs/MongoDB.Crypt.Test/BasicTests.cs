@@ -449,6 +449,11 @@ namespace MongoDB.Crypt.Test
         {
             var text = ReadTestFile(file);
 
+            if (text == null)
+            {
+                throw new FileNotFoundException(file);
+            }
+
             // Work around C# drivers and C driver have different extended json support
             text = text.Replace("\"$numberLong\"", "$numberLong");
 
