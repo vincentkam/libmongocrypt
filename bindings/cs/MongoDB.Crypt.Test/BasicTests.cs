@@ -30,7 +30,7 @@ namespace MongoDB.Crypt.Test
 {
     public class BasicTests
     {
-        private readonly ITestOutputHelper _output;
+        private static ITestOutputHelper _output;
 
         public BasicTests(ITestOutputHelper output)
         {
@@ -410,6 +410,11 @@ namespace MongoDB.Crypt.Test
             var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string cwd = Directory.GetCurrentDirectory(); // Assume we are child directory of the repo
             var searchDirectory = assemblyLocation ?? cwd;
+            var testDir2 = Enumerable.Range(1, 10)
+                .Select(i => Enumerable.Repeat("..", i))
+                .Select(dotsSeq => dotsSeq.Aggregate(Path.Combine))
+                .Select(previousDirectories => Path.Combine(previousDirectories, searchPath))
+                .Where(Directory.Exists);
             var testDirs = new List<string>();
             for(int i = 0; i < 10; i++)
             {
@@ -464,10 +469,15 @@ namespace MongoDB.Crypt.Test
 
         static string ReadTestFile(string fileName)
         {
+            var paths = FindTestDirectories()
+                .Select(directory => Path.Combine(directory, fileName));
+            _output.WriteLine("Potential paths:" + paths.Aggregate((toStr,path)=>$"{path};{toStr}"));
+            _output.WriteLine($"Paths where {fileName} exists:" + paths.Where(File.Exists).Aggregate((toStr,path)=>$"{path};{toStr}"));
             return FindTestDirectories()
                 .Select(directory => Path.Combine(directory, fileName))
-                .Select(path => File.Exists(path) ? File.ReadAllText(path) : null)
-                .FirstOrDefault(text => text != null);
+                .Where(File.Exists)
+                .Select(File.ReadAllText)
+                .FirstOrDefault();
         }
     }
 }
