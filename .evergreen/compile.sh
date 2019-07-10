@@ -28,6 +28,7 @@ cd mongo-c-driver
 # Use C driver helper script to find cmake binary, stored in $CMAKE.
 if [ "$OS" == "Windows_NT" ]; then
     CMAKE=/cygdrive/c/cmake/bin/cmake
+    ADDITIONAL_CMAKE_FLAGS="-Thost=x64 -A x64"
 else
     chmod u+x ./.evergreen/find-cmake.sh
     . ./.evergreen/find-cmake.sh
@@ -39,7 +40,7 @@ python ./build/calc_release_version.py -p > VERSION_RELEASED
 mkdir cmake-build
 cd cmake-build
 # To statically link when using a shared library, compile shared library with -fPIC: https://stackoverflow.com/a/8810996/774658
-$CMAKE -DENABLE_MONGOC=OFF -DCMAKE_BUILD_TYPE=Debug -DENABLE_EXTRA_ALIGNMENT=OFF -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}/mongo-c-driver ../
+$CMAKE -DENABLE_MONGOC=OFF $ADDITIONAL_CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DENABLE_EXTRA_ALIGNMENT=OFF -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}/mongo-c-driver ../
 echo "Installing libbson"
 # TODO - Upgrade to cmake 3.12 and use "-j" to increase parallelism
 $CMAKE --build . --target install
@@ -49,7 +50,7 @@ cd $evergreen_root
 cd libmongocrypt
 mkdir cmake-build
 cd cmake-build
-$CMAKE -DCMAKE_BUILD_TYPE=Debug "${LIBMONGOCRYPT_EXTRA_CMAKE_FLAGS}" -DCMAKE_C_FLAGS="-fPIC ${LIBMONGOCRYPT_EXTRA_CFLAGS}" -DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}/mongo-c-driver" "-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}/libmongocrypt" ../
+$CMAKE -DCMAKE_BUILD_TYPE=Debug $ADDITIONAL_CMAKE_FLAGS "${LIBMONGOCRYPT_EXTRA_CMAKE_FLAGS}" -DCMAKE_C_FLAGS="-fPIC ${LIBMONGOCRYPT_EXTRA_CFLAGS}" -DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}/mongo-c-driver" "-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}/libmongocrypt" ../
 echo "Installing libmongocrypt"
 $CMAKE --build . --target install
 # CDRIVER-3187, ensure the final distributed tarball contains the libbson static
