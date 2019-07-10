@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 using System.Text;
 using FluentAssertions;
@@ -405,13 +406,14 @@ namespace MongoDB.Crypt.Test
 
         static IEnumerable<string> FindTestDirectories()
         {
-            // Assume we are child directory of the repo
             string searchPath = Path.Combine("..", "test", "example");
-            string cwd = Directory.GetCurrentDirectory();
+            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string cwd = Directory.GetCurrentDirectory(); // Assume we are child directory of the repo
+            var searchDirectory = assemblyLocation ?? cwd;
             var testDirs = new List<string>();
             for(int i = 0; i < 10; i++)
             {
-                string testPath = Path.Combine(cwd, searchPath);
+                string testPath = Path.Combine(searchDirectory, searchPath);
                 if (Directory.Exists(testPath))
                 {
                     testDirs.Add(testPath);
@@ -465,7 +467,7 @@ namespace MongoDB.Crypt.Test
             return FindTestDirectories()
                 .Select(directory => Path.Combine(directory, fileName))
                 .Select(path => File.Exists(path) ? File.ReadAllText(path) : null)
-                .FirstOrDefault(httpText => httpText != null);
+                .FirstOrDefault(text => text != null);
         }
     }
 }
