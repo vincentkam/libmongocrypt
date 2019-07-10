@@ -216,7 +216,10 @@ namespace MongoDB.Crypt
                 if (_handle == IntPtr.Zero)
                 {
                     var gle = Marshal.GetLastWin32Error();
-                    throw new FileNotFoundException(path + ", Windows Error: " + gle);
+
+                    // error code 193 indicates that a 64-bit OS has tried to load a 32-bit dll
+                    // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
+                    throw new LibraryLoadingException(path + ", Windows Error: " + gle);
                 }
             }
 
