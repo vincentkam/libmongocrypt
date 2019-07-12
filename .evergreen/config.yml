@@ -74,7 +74,6 @@ functions:
     - command: "shell.exec"
       params:
         script: |-
-          eval "${inject_env_from_evergreen}"
           ${compile_env|} ./libmongocrypt/.evergreen/compile.sh
           ${test_env|} ./libmongocrypt/.evergreen/test.sh
           ${compile_env|} ./libmongocrypt/.evergreen/compile_cs.sh
