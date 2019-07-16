@@ -411,24 +411,14 @@ namespace MongoDB.Crypt.Test
             var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string cwd = Directory.GetCurrentDirectory(); // Assume we are child directory of the repo
             var searchDirectory = assemblyLocation ?? cwd;
-            var testDir2 = Enumerable.Range(1, 10)
+            var testDirs = Enumerable.Range(1, 10)
                 .Select(i => Enumerable.Repeat("..", i))
                 .Select(dotsSeq => dotsSeq.Aggregate(Path.Combine))
-                .Select(previousDirectories => Path.Combine(previousDirectories, searchPath))
-                .Where(Directory.Exists);
-            var testDirs = new List<string>();
-            for(int i = 0; i < 10; i++)
-            {
-                string testPath = Path.Combine(searchDirectory, searchPath);
-                if (Directory.Exists(testPath))
-                {
-                    testDirs.Add(testPath);
-                }
+                .Select(previousDirectories => Path.Combine(searchDirectory, previousDirectories, searchPath))
+                .Where(Directory.Exists)
+                .ToArray();
 
-                searchPath = Path.Combine("..", searchPath);
-            }
-
-            if (testDirs.Count == 0)
+            if (!testDirs.Any())
             {
                 throw new DirectoryNotFoundException("test/example");
             }
