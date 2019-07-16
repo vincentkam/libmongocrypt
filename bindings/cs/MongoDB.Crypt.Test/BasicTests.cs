@@ -460,10 +460,6 @@ namespace MongoDB.Crypt.Test
 
         static string ReadTestFile(string fileName)
         {
-            var paths = FindTestDirectories()
-                .Select(directory => Path.Combine(directory, fileName));
-            _output.WriteLine("Potential paths:" + paths.Aggregate((toStr,path)=>$"{path};{toStr}"));
-            _output.WriteLine($"Paths where {fileName} exists:" + paths.Where(File.Exists).Aggregate((toStr,path)=>$"{path};{toStr}"));
             return FindTestDirectories()
                 .Select(directory => Path.Combine(directory, fileName))
                 .Where(File.Exists)
