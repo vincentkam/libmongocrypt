@@ -385,6 +385,7 @@ namespace MongoDB.Crypt.Test
                     Binary binary = context.FinalizeForEncryption();
                     _output.WriteLine("Buffer:" + binary.ToArray());
                     var document = BsonUtil.ToDocument(binary);
+                    _output.WriteLine("Document:" + document);
                     return (CryptContext.StateCode.MONGOCRYPT_CTX_READY, binary, document);
                 }
 
