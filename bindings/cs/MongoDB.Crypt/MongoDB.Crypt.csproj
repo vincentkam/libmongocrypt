@@ -18,17 +18,17 @@
     <Description>Official MongoDB supported driver for MongoDB. See http://www.mongodb.org/display/DOCS/CSharp+Language+Center for more details.</Description>
     <Authors>markbenvenuto, vincentkam</Authors>
     <PackageIconUrl>http://jobs.mongodb.org/files/logos/889002/889002.png</PackageIconUrl>
-    <!-- <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance> -->
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageDescription>Official .NET Cryptography support library for MongoDB.</PackageDescription>
     <PackageProjectUrl>http://www.mongodb.org/display/DOCS/CSharp+Language+Center</PackageProjectUrl>
-    <!-- <PackageLicenseFile>License.txt</PackageLicenseFile> -->
+    <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageTags>mongodb;mongo;nosql</PackageTags>
     <PackageLanguage>en-US</PackageLanguage>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <PropertyGroup>
-    <MDBDeveloperDirectory>../../../build/$(Configuration)</MDBDeveloperDirectory>
+    <MDBDeveloperDirectory>../../../cmake-build/$(Configuration)</MDBDeveloperDirectory>
     <MDBDeveloperDirectory Condition="'$(Configuration)'=='Debug' And '$(OS)' != 'Windows_NT'">../../../debug/</MDBDeveloperDirectory>
     <MDBDeveloperDirectory Condition="'$(Configuration)'=='Release' And '$(OS)' != 'Windows_NT'">../../../release/</MDBDeveloperDirectory>
   </PropertyGroup>
@@ -61,6 +61,31 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup> -->
+  <ItemGroup>
+    <Content Include="$(MDBDeveloperDirectory)/mongocrypt.dll" >
+      <Pack>true</Pack>
+      <PackagePath>x64/native/windows</PackagePath>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(MDBDeveloperDirectory)/mongocrypt.pdb" >
+      <Pack>true</Pack>
+      <PackagePath>x64/native/windows</PackagePath>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="License.txt">
+      <Pack>true</Pack>
+      <PackagePath>$(PackageLicenseFile)</PackagePath>
+    </Content>
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Version)'==''">
+    <Version>0.0.0-local</Version>
+  </PropertyGroup>
+
+
 
   <Import Project="Package.csproj.include" Condition="Exists('Package.csproj.include')" />
 
