@@ -95,7 +95,7 @@ namespace MongoDB.Crypt
         /// <param name="algorithm">The algorithm.</param>
         /// <param name="command">The BSON command.</param>
         /// <returns>A encryption context. </returns>
-        public CryptContext StartExplicitEncryptionContext(Guid key, Alogrithm algorithm, byte[] command)
+        public CryptContext StartExplicitEncryptionContext(Guid key, Algorithm algorithm, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
             
@@ -136,7 +136,7 @@ namespace MongoDB.Crypt
         /// <param name="algorithm">The algorithm.</param>
         /// <param name="command">The BSON command.</param>
         /// <returns>A encryption context. </returns>
-        public CryptContext StartExplicitEncryptionContext(byte[] keyAltName, Alogrithm algorithm, byte[] command)
+        public CryptContext StartExplicitEncryptionContext(byte[] keyAltName, Algorithm algorithm, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
             unsafe
