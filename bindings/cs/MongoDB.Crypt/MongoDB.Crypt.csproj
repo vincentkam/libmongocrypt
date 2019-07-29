@@ -69,7 +69,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(MDBDeveloperDirectory)/mongocrypt.pdb" >
+    <Content Include="$(MDBDeveloperDirectory)/mongocrypt.pdb" Condition="'$(Configuration)'=='Debug'">
       <Pack>true</Pack>
       <PackagePath>x64/native/windows</PackagePath>
     </Content>
@@ -81,11 +81,10 @@
       <PackagePath>$(PackageLicenseFile)</PackagePath>
     </Content>
   </ItemGroup>
+
   <PropertyGroup Condition="'$(Version)'==''">
     <Version>0.0.0-local</Version>
   </PropertyGroup>
-
-
 
   <Import Project="Package.csproj.include" Condition="Exists('Package.csproj.include')" />
 
