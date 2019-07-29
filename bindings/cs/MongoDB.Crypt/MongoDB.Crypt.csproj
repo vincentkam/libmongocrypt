@@ -69,7 +69,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="$(MDBDeveloperDirectory)/mongocrypt.pdb" >
+    <Content Include="$(MDBDeveloperDirectory)/mongocrypt.pdb" Condition="'$(Configuration)'=='Debug'">
       <Pack>true</Pack>
       <PackagePath>x64/native/windows</PackagePath>
     </Content>
