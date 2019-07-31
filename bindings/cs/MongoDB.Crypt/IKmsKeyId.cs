@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
+
 namespace MongoDB.Crypt
 {
     /// <summary>
@@ -28,6 +31,14 @@ namespace MongoDB.Crypt
         /// The type of the KMS key.
         /// </value>
         KmsType KeyType { get; }
+
+        /// <summary>
+        /// Gets the alternate key names as byte arrays.
+        /// Each byte array describes an alternative key name via a BsonDocument in the following format:
+        ///  { "keyAltName" : [BSON UTF8 value] }
+        /// </summary>
+        /// <value>The alternate key names.</value>
+        IEnumerable<byte[]> AlternateKeyNames { get; }
     }
 
     /// <summary>
@@ -37,5 +48,31 @@ namespace MongoDB.Crypt
     internal interface IInternalKmsKeyId
     {
         void SetCredentials(ContextSafeHandle handle, Status status);
+        void SetAlternateKeyNames(ContextSafeHandle handle, Status status);
+    }
+
+    /// <summary>
+    /// Using extension methods in lieu of default interface methods that will not be available until C#8 releases
+    /// </summary>
+    internal static class KmsExtensions
+    {
+        internal static void SetAlternateKeyNames(this IKmsKeyId kmsKeyId, ContextSafeHandle handle, Status status)
+        {
+            foreach (var alternateKeyName in kmsKeyId.AlternateKeyNames)
+            {
+                unsafe
+                {
+                    fixed (byte* p = alternateKeyName)
+                    {
+                        IntPtr ptr = (IntPtr)p;
+                        using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)alternateKeyName.Length))
+                        {
+                            handle.Check( status, Library.mongocrypt_ctx_setopt_key_alt_name(handle, pinned.Handle));
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

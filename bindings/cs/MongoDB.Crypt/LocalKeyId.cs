@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+
 namespace MongoDB.Crypt
 {
     /// <summary>Contains all the information needed to describe a Local KMS CMK.</summary>
@@ -25,13 +27,31 @@ namespace MongoDB.Crypt
         /// <param name="key">The key.</param>
         public LocalKeyId()
         {
+            AlternateKeyNames = new List<byte[]>().AsReadOnly();
+        }
+
+        /// <summary>
+        /// Creates an <see cref="LocalKeyId"/> class.
+        /// </summary>
+        /// <param name="alternateKeyNames">The alternate key names.</param>
+        public LocalKeyId(IEnumerable<byte[]> alternateKeyNames)
+        {
+            AlternateKeyNames = alternateKeyNames;
         }
 
         public KmsType KeyType => KmsType.Local;
 
+        public IEnumerable<byte[]> AlternateKeyNames { get; }
+
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
         {
             handle.Check(status, Library.mongocrypt_ctx_setopt_masterkey_local(handle));
+            ((IInternalKmsKeyId) this).SetAlternateKeyNames(handle, status);
+        }
+
+        void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle handle, Status status)
+        {
+            this.SetAlternateKeyNames(handle, status);
         }
     }
 }

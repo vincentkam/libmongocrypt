@@ -15,6 +15,8 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 
 namespace MongoDB.Crypt
@@ -33,7 +35,23 @@ namespace MongoDB.Crypt
         {
             Region = region;
             CustomerMasterKey = customerMasterKey;
+            AlternateKeyNames = new List<byte[]>().AsReadOnly();
         }
+
+        /// <summary>
+        /// Creates an <see cref="AwsKeyId"/> class.
+        /// </summary>
+        /// <param name="customerMasterKey">The customerMasterKey.</param>
+        /// <param name="region">The region.</param>
+        /// <param name="alternateKeyNames">The alternate key names.</param>
+        public AwsKeyId(string customerMasterKey, string region, IEnumerable<byte[]> alternateKeyNames)
+        {
+            Region = region;
+            CustomerMasterKey = customerMasterKey;
+            AlternateKeyNames = alternateKeyNames;
+        }
+
+        public IEnumerable<byte[]> AlternateKeyNames { get; }
 
         /// <summary>Gets the region.</summary>
         /// <value>The region.</value>
@@ -49,16 +67,18 @@ namespace MongoDB.Crypt
 
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
         {
-            IntPtr stringPointer = (IntPtr)Marshal.StringToHGlobalAnsi(Region);
+            IntPtr regionPointer = (IntPtr)Marshal.StringToHGlobalAnsi(Region);
 
             try
             {
                 IntPtr keyPointer = (IntPtr)Marshal.StringToHGlobalAnsi(CustomerMasterKey);
-
                 try
                 {
                     // Let mongocrypt run strlen
-                    handle.Check(status, Library.mongocrypt_ctx_setopt_masterkey_aws(handle, stringPointer, -1, keyPointer, -1));
+                    handle.Check(
+                        status,
+                        Library.mongocrypt_ctx_setopt_masterkey_aws(handle, regionPointer, -1, keyPointer, -1));
+                    ((IInternalKmsKeyId) this).SetAlternateKeyNames(handle, status);
                 }
                 finally
                 {
@@ -67,8 +87,13 @@ namespace MongoDB.Crypt
             }
             finally
             {
-                Marshal.FreeHGlobal(stringPointer);
+                Marshal.FreeHGlobal(regionPointer);
             }
+        }
+
+        void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle handle, Status status)
+        {
+            this.SetAlternateKeyNames(handle, status);
         }
     }
 }

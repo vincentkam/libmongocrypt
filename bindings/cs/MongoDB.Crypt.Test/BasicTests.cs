@@ -261,6 +261,26 @@ namespace MongoDB.Crypt.Test
         }
 
         [Fact]
+        public void TestDataKeyCreation()
+        {
+            var altKeyNames = new[] {"KeyMaker", "Architect"};
+            var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
+            var altKeyNameBuffers = altKeyNameDocuments.Select(BsonUtil.ToBytes);
+            var key = new LocalKmsCredentials(new byte[96]);
+            var keyId = new LocalKeyId(altKeyNameBuffers);
+            var cryptOptions = new CryptOptions(key);
+
+            using (var cryptClient = CryptClientFactory.Create(cryptOptions))
+            using (var context =
+                cryptClient.StartCreateDataKeyContext(keyId))
+            {
+                var (_, dataKeyDocument) = ProcessContextToCompletion(context);
+                dataKeyDocument.Should().NotBeNull();
+                dataKeyDocument["keyAltNames"].AsBsonArray.Should().ContainInOrder(altKeyNames);
+            }
+        }
+
+        [Fact]
         public void TestLocalKeyCreation()
         {
 
