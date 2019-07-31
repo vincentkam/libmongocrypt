@@ -35,7 +35,6 @@ namespace MongoDB.Crypt
             IInternalKmsCredentials kmsCredentials = (IInternalKmsCredentials)options.KmsCredentials;
             kmsCredentials.SetCredentials(handle,status);
 
-            // TODO - set logger
             if (options.Schema != null)
             {
                 unsafe
