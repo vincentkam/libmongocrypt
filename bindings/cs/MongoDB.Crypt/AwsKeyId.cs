@@ -27,7 +27,7 @@ namespace MongoDB.Crypt
         /// <summary>
         /// Creates an <see cref="AwsKeyId"/> class.
         /// </summary>
-        /// <param name="customerMasterKey">The customerMasterKey.</param>
+        /// <param name="customerMasterKey">The Amazon Resource Name (ARN) of the customer master key.</param>
         /// <param name="region">The region.</param>
         public AwsKeyId(string customerMasterKey, string region)
         {
@@ -40,10 +40,10 @@ namespace MongoDB.Crypt
         public string Region { get; }
 
         /// <summary>
-        /// Gets the customer master key.
+        /// Gets the Amazon Resource Name (ARN) of the customer master key.
         /// </summary>
         /// <value>
-        /// The customer master key.
+        /// The Amazon Resource Name (ARN) of the customer master key.
         /// </value>
         public string CustomerMasterKey { get; }
 
