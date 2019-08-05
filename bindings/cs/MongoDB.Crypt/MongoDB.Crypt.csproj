@@ -31,6 +31,7 @@
     <LibMongoCryptBinaries>../../../cmake-build/$(Configuration)</LibMongoCryptBinaries>
     <LibMongoCryptBinaries Condition="'$(Configuration)'=='Debug' And '$(OS)' != 'Windows_NT'">../../../debug/</LibMongoCryptBinaries>
     <LibMongoCryptBinaries Condition="'$(Configuration)'=='Release' And '$(OS)' != 'Windows_NT'">../../../release/</LibMongoCryptBinaries>
+    <LibMongoCryptBinaries Condition="'$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT'">../../../cmake-build/RelWithDebInfo/</LibMongoCryptBinaries>
   </PropertyGroup>
 
   <ItemGroup>
