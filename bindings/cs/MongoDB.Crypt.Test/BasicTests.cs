@@ -276,7 +276,8 @@ namespace MongoDB.Crypt.Test
             {
                 var (_, dataKeyDocument) = ProcessContextToCompletion(context);
                 dataKeyDocument.Should().NotBeNull();
-                dataKeyDocument["keyAltNames"].AsBsonArray.Should().ContainInOrder(altKeyNames);
+                var actualAltKeyNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
+                actualAltKeyNames.Should().Contain(altKeyNames);
             }
         }
 
