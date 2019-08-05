@@ -87,6 +87,15 @@
     <Version>0.0.0-local</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DocumentationFile>bin\x64\Debug\MongoDB.Crypt.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DocumentationFile>bin\x64\Release\MongoDB.Crypt.xml</DocumentationFile>
+  </PropertyGroup>
+  
   <Import Project="Package.csproj.include" Condition="Exists('Package.csproj.include')" />
 
 </Project>
