@@ -168,7 +168,6 @@ namespace MongoDB.Crypt
 
         void IStatus.Check(Status status)
         {
-            // look into this
             Library.mongocrypt_ctx_status(_handle, status.Handle);
         }
 
