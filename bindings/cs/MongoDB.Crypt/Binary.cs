@@ -93,8 +93,10 @@ namespace MongoDB.Crypt
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_handle.IsClosed)
+            // Adapted from: https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle?view=netcore-3.0
+            if (_handle != null && !_handle.IsInvalid)
             {
+                // Free the handle
                 _handle.Dispose();
             }
         }
