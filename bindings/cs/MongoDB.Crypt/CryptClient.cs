@@ -243,9 +243,9 @@ namespace MongoDB.Crypt
         }
         #endregion
 
-        private void Check(bool ret)
+        private void Check(bool success)
         {
-            if (!ret)
+            if (!success)
             {
                 _status.Check(this);
             }

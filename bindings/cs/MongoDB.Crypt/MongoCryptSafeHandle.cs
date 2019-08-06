@@ -33,9 +33,9 @@ namespace MongoDB.Crypt
         {
         }
 
-        public void Check(Status status, bool ret)
+        public void Check(Status status, bool success)
         {
-            if (!ret)
+            if (!success)
             {
                 Library.mongocrypt_status(this, status.Handle);
                 status.ThrowExceptionIfNeeded();

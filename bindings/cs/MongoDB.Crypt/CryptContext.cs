@@ -194,9 +194,9 @@ namespace MongoDB.Crypt
             Check(Library.mongocrypt_ctx_kms_done(_handle));
         }
 
-        private void Check(bool ret)
+        private void Check(bool success)
         {
-            if (!ret)
+            if (!success)
             {
                 _status.Check(this);
             }

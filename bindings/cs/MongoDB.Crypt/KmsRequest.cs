@@ -100,9 +100,9 @@ namespace MongoDB.Crypt
             Library.mongocrypt_kms_ctx_status(_id, status.Handle);
         }
 
-        private void Check(bool ret)
+        private void Check(bool success)
         {
-            if (!ret)
+            if (!success)
             {
                 _status.Check(this);
             }
