@@ -57,7 +57,7 @@ namespace MongoDB.Crypt
                     string.Empty
                 };
                 string path = FindLibrary(candidatePaths, suffixPaths, "libmongocrypt.dylib");
-                _loader = new DarwinLibrary(path);
+                _loader = new DarwinLibraryLoader(path);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -131,7 +131,7 @@ namespace MongoDB.Crypt
         /// <summary>
         /// macOS Dynamic Library loader using dlsym
         /// </summary>
-        private class DarwinLibrary : ISharedLibraryLoader
+        private class DarwinLibraryLoader : ISharedLibraryLoader
         {
 
             // See dlfcn.h
@@ -143,7 +143,7 @@ namespace MongoDB.Crypt
             public const int RTLD_NOW = 0x2;
 
             private readonly IntPtr _handle;
-            public DarwinLibrary(string path)
+            public DarwinLibraryLoader(string path)
             {
                 _handle = dlopen(path, RTLD_GLOBAL | RTLD_NOW);
                 if (_handle == IntPtr.Zero)
