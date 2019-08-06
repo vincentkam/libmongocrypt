@@ -261,6 +261,26 @@ namespace MongoDB.Crypt.Test
         }
 
         [Fact]
+        public void TestAwsKeyCreationWithAltKeyNames()
+        {
+            var altKeyNames = new[] {"KeyMaker", "Architect"};
+            var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
+            var altKeyNameBuffers = altKeyNameDocuments.Select(BsonUtil.ToBytes);
+            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: altKeyNameBuffers);
+            var key = new AwsKmsCredentials(awsSecretAccessKey: "us-east-1", awsAccessKeyId: "us-east-1");
+
+            using (var cryptClient = CryptClientFactory.Create(new CryptOptions(key)))
+            using (var context =
+                cryptClient.StartCreateDataKeyContext(keyId))
+            {
+                var (_, dataKeyDocument) = ProcessContextToCompletion(context, isKmsDecrypt: false);
+                dataKeyDocument.Should().NotBeNull();
+                var actualAltKeyNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
+                actualAltKeyNames.Should().Contain(altKeyNames);
+            }
+        }
+
+        [Fact]
         public void TestLocalKeyCreationWithAltKeyNames()
         {
             var altKeyNames = new[] {"KeyMaker", "Architect"};
@@ -280,7 +300,6 @@ namespace MongoDB.Crypt.Test
                 actualAltKeyNames.Should().Contain(altKeyNames);
             }
         }
-
 
         [Fact]
         public void TestLocalKeyCreationWithAltKeyNamesStepwise()
@@ -346,14 +365,14 @@ namespace MongoDB.Crypt.Test
             }
         }
 
-        private (Binary binarySent, BsonDocument document) ProcessContextToCompletion(CryptContext context)
+        private (Binary binarySent, BsonDocument document) ProcessContextToCompletion(CryptContext context, bool isKmsDecrypt = true)
         {
             BsonDocument document = null;
             Binary binary = null;
 
             while (!context.IsDone)
             {
-                (_, binary, document) = ProcessState(context);
+                (_, binary, document) = ProcessState(context, isKmsDecrypt);
             }
 
             return (binary, document);
@@ -364,9 +383,10 @@ namespace MongoDB.Crypt.Test
         /// Returns (stateProcessed, binaryOperationProduced, bsonOperationProduced)
         /// </summary>
         /// <param name="context"></param>
+        /// <param name="isKmsDecrypt"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        private (CryptContext.StateCode stateProcessed, Binary binaryProduced, BsonDocument bsonOperationProduced) ProcessState(CryptContext context)
+        private (CryptContext.StateCode stateProcessed, Binary binaryProduced, BsonDocument bsonOperationProduced) ProcessState(CryptContext context, bool isKmsDecrypt = true)
         {
             _output.WriteLine("\n----------------------------------\nState:" + context.State);
             switch (context.State)
@@ -417,7 +437,7 @@ namespace MongoDB.Crypt.Test
                         var postRequest = binary.ToString();
                         postRequest.Should().Contain("Host:kms.us-east-1.amazonaws.com");
 
-                        var reply = ReadHttpTestFile("kms-decrypt-reply.txt");
+                        var reply = ReadHttpTestFile(isKmsDecrypt ? "kms-decrypt-reply.txt" : "kms-encrypt-reply.txt");
                         _output.WriteLine("Reply: " + reply);
                         req.Feed(Encoding.UTF8.GetBytes(reply));
                         req.BytesNeeded.Should().Be(0);
@@ -454,14 +474,15 @@ namespace MongoDB.Crypt.Test
 
         static IEnumerable<string> FindTestDirectories()
         {
-            string searchPath = Path.Combine("..", "test", "example");
+            string[] searchPaths = new [] { Path.Combine("..", "test", "example"), Path.Combine("..", "test", "data") };
             var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string cwd = Directory.GetCurrentDirectory(); // Assume we are child directory of the repo
             var searchDirectory = assemblyLocation ?? cwd;
             var testDirs = Enumerable.Range(1, 10)
                 .Select(i => Enumerable.Repeat("..", i))
                 .Select(dotsSeq => dotsSeq.Aggregate(Path.Combine))
-                .Select(previousDirectories => Path.Combine(searchDirectory, previousDirectories, searchPath))
+                .SelectMany(previousDirectories =>
+                    searchPaths.Select(searchPath => Path.Combine(searchDirectory, previousDirectories, searchPath)))
                 .Where(Directory.Exists)
                 .ToArray();
 
