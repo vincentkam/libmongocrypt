@@ -261,7 +261,7 @@ namespace MongoDB.Crypt.Test
         }
 
         [Fact]
-        public void TestDataKeyCreation()
+        public void TestLocalKeyCreationWithAltKeyNames()
         {
             var altKeyNames = new[] {"KeyMaker", "Architect"};
             var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
@@ -283,7 +283,7 @@ namespace MongoDB.Crypt.Test
 
 
         [Fact]
-        public void TestDataKeyCreationStepwise()
+        public void TestLocalKeyCreationWithAltKeyNamesStepwise()
         {
             var altKeyNames = new[] {"KeyMaker", "Architect"};
             var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
