@@ -197,7 +197,7 @@ namespace MongoDB.Crypt.Test
 
             Binary encryptedResult;
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
-            using (var context = cryptClient.StartExplicitEncryptionContext(key, Algorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData))
+            using (var context = cryptClient.StartExplicitEncryptionContext(key, EncryptionAlgorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData))
             {
                 (encryptedResult, _) = ProcessContextToCompletion(context);
             }
@@ -227,7 +227,7 @@ namespace MongoDB.Crypt.Test
                 Binary encryptedResult;
                 using (var context = cryptClient.StartExplicitEncryptionContext(
                     key: key,
-                    algorithm: Algorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic,
+                    encryptionAlgorithm: EncryptionAlgorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic,
                     command: testData))
                 {
                     var (state, binaryProduced, operationProduced) = ProcessState(context);

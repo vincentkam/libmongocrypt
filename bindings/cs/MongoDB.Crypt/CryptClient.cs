@@ -92,10 +92,10 @@ namespace MongoDB.Crypt
         /// Starts an explicit encryption context.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <param name="algorithm">The algorithm.</param>
+        /// <param name="encryptionAlgorithm">The encryption algorithm.</param>
         /// <param name="command">The BSON command.</param>
         /// <returns>A encryption context. </returns>
-        public CryptContext StartExplicitEncryptionContext(Guid key, Algorithm algorithm, byte[] command)
+        public CryptContext StartExplicitEncryptionContext(Guid key, EncryptionAlgorithm encryptionAlgorithm, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
             
@@ -112,7 +112,7 @@ namespace MongoDB.Crypt
                 }
             }
 
-            handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.AlgorithmToString(algorithm), -1));
+            handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.EncryptionAlgorithmToString(encryptionAlgorithm), -1));
 
             unsafe
             {
@@ -133,10 +133,10 @@ namespace MongoDB.Crypt
         /// Starts an explicit encryption context.
         /// </summary>
         /// <param name="keyAltName">The alternative key name.</param>
-        /// <param name="algorithm">The algorithm.</param>
+        /// <param name="encryptionAlgorithm">The algorithm.</param>
         /// <param name="command">The BSON command.</param>
         /// <returns>A encryption context. </returns>
-        public CryptContext StartExplicitEncryptionContext(byte[] keyAltName, Algorithm algorithm, byte[] command)
+        public CryptContext StartExplicitEncryptionContext(byte[] keyAltName, EncryptionAlgorithm encryptionAlgorithm, byte[] command)
         {
             ContextSafeHandle handle = Library.mongocrypt_ctx_new(_handle);
             unsafe
@@ -151,7 +151,7 @@ namespace MongoDB.Crypt
                 }
             }
 
-            handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.AlgorithmToString(algorithm), -1));
+            handle.Check(_status, Library.mongocrypt_ctx_setopt_algorithm(handle, Helpers.EncryptionAlgorithmToString(encryptionAlgorithm), -1));
 
             unsafe
             {

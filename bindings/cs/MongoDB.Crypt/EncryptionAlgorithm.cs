@@ -16,7 +16,7 @@
 
 namespace MongoDB.Crypt
 {
-    public enum Algorithm
+    public enum EncryptionAlgorithm
     {
         AEAD_AES_256_CBC_HMAC_SHA_512_Random = 0,
         AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic = 1,

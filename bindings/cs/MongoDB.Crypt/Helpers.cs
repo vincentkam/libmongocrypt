@@ -20,13 +20,13 @@ namespace MongoDB.Crypt
 {
     internal static class Helpers {
 
-        internal static string AlgorithmToString(Algorithm algo)
+        internal static string EncryptionAlgorithmToString(EncryptionAlgorithm algo)
         {
             switch(algo)
             {
-                case Algorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic:
+                case EncryptionAlgorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic:
                     return "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic";
-                case Algorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random:
+                case EncryptionAlgorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random:
                     return "AEAD_AES_256_CBC_HMAC_SHA_512-Random";
                 default:
                     throw new NotImplementedException();
