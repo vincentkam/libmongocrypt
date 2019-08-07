@@ -22,7 +22,7 @@ cd $evergreen_root
 
 # Build and install libbson.
 # Force checkout of with lf endings since .sh must have lf, not crlf on Windows
-#git clone git@github.com:mongodb/mongo-c-driver.git --config core.eol=lf --config core.autocrlf=false
+git clone git@github.com:mongodb/mongo-c-driver.git --config core.eol=lf --config core.autocrlf=false
 cd mongo-c-driver
 
 # Use C driver helper script to find cmake binary, stored in $CMAKE.
@@ -37,7 +37,7 @@ fi
 $CMAKE --version
 python ./build/calc_release_version.py > VERSION_CURRENT
 python ./build/calc_release_version.py -p > VERSION_RELEASED
-mkdir -p cmake-build
+mkdir cmake-build
 cd cmake-build
 # To statically link when using a shared library, compile shared library with -fPIC: https://stackoverflow.com/a/8810996/774658
 $CMAKE -DENABLE_MONGOC=OFF $ADDITIONAL_CMAKE_FLAGS -DCMAKE_BUILD_TYPE=Debug -DENABLE_EXTRA_ALIGNMENT=OFF -DCMAKE_C_FLAGS="-fPIC" -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}/mongo-c-driver ../
@@ -48,7 +48,7 @@ cd $evergreen_root
 
 # Build and install libmongocrypt.
 cd libmongocrypt
-mkdir -p cmake-build
+mkdir cmake-build
 cd cmake-build
 $CMAKE -DCMAKE_BUILD_TYPE=Debug $ADDITIONAL_CMAKE_FLAGS "${LIBMONGOCRYPT_EXTRA_CMAKE_FLAGS}" -DCMAKE_C_FLAGS="-fPIC ${LIBMONGOCRYPT_EXTRA_CFLAGS}" -DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}/mongo-c-driver" "-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}/libmongocrypt" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../
 
@@ -67,7 +67,7 @@ cd $evergreen_root
 
 # Build and install libmongocrypt with no native crypto.
 cd libmongocrypt
-mkdir -p cmake-build-nocrypto
+mkdir cmake-build-nocrypto
 cd cmake-build-nocrypto
 $CMAKE -DDISABLE_NATIVE_CRYPTO=ON -DCMAKE_BUILD_TYPE=Debug "${LIBMONGOCRYPT_EXTRA_CMAKE_FLAGS}" -DCMAKE_C_FLAGS="-fPIC ${LIBMONGOCRYPT_EXTRA_CFLAGS}" -DCMAKE_PREFIX_PATH="${INSTALL_PREFIX}/mongo-c-driver" "-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}/libmongocrypt/nocrypto" ../
 echo "Installing libmongocrypt with no crypto"
