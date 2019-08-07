@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace MongoDB.Crypt
@@ -43,19 +44,20 @@ namespace MongoDB.Crypt
         /// </summary>
         /// <param name="customerMasterKey">The customerMasterKey.</param>
         /// <param name="region">The region.</param>
-        /// <param name="alternateKeyNames">The alternate key names.</param>
+        /// <param name="alternateKeyNames">The alternate key names.
+        /// Each byte array describes an alternative key name via a BsonDocument in the following format:
+        ///  { "keyAltName" : [BSON UTF8 value] }</param>
         public AwsKeyId(string customerMasterKey, string region, IEnumerable<byte[]> alternateKeyNames)
         {
             Region = region;
             CustomerMasterKey = customerMasterKey;
-            AlternateKeyNames = alternateKeyNames;
+            AlternateKeyNames = alternateKeyNames.ToList().AsReadOnly();
         }
-
-        public IEnumerable<byte[]> AlternateKeyNames { get; }
 
         /// <summary>Gets the region.</summary>
         /// <value>The region.</value>
         public string Region { get; }
+        public IReadOnlyList<byte[]> AlternateKeyNames { get; }
 
         /// <summary>
         /// Gets the customer master key.

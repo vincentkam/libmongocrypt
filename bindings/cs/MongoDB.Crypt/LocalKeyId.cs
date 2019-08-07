@@ -15,6 +15,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MongoDB.Crypt
 {
@@ -33,15 +34,18 @@ namespace MongoDB.Crypt
         /// <summary>
         /// Creates an <see cref="LocalKeyId"/> class.
         /// </summary>
-        /// <param name="alternateKeyNames">The alternate key names.</param>
+        /// <param name="alternateKeyNames">The alternate key names.
+        /// Each byte array describes an alternative key name via a BsonDocument in the following format:
+        ///  { "keyAltName" : [BSON UTF8 value] }
+        /// </param>
         public LocalKeyId(IEnumerable<byte[]> alternateKeyNames)
         {
-            AlternateKeyNames = alternateKeyNames;
+            AlternateKeyNames = alternateKeyNames.ToList().AsReadOnly();
         }
 
         public KmsType KeyType => KmsType.Local;
+        public IReadOnlyList<byte[]> AlternateKeyNames { get; }
 
-        public IEnumerable<byte[]> AlternateKeyNames { get; }
 
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
         {

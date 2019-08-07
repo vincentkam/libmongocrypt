@@ -38,7 +38,7 @@ namespace MongoDB.Crypt
         ///  { "keyAltName" : [BSON UTF8 value] }
         /// </summary>
         /// <value>The alternate key names.</value>
-        IEnumerable<byte[]> AlternateKeyNames { get; }
+        IReadOnlyList<byte[]> AlternateKeyNames { get; }
     }
 
     /// <summary>
