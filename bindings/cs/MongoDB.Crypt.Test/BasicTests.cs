@@ -195,15 +195,16 @@ namespace MongoDB.Crypt.Test
 
             var testData = BsonUtil.ToBytes(doc);
 
-            Binary encryptedResult;
+            byte[] encryptedBytes;
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
             using (var context = cryptClient.StartExplicitEncryptionContext(key, EncryptionAlgorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData))
             {
-                (encryptedResult, _) = ProcessContextToCompletion(context);
+                var (encryptedBinary, encryptedDocument) = ProcessContextToCompletion(context);
+                encryptedBytes = encryptedBinary.ToArray(); // need to copy bytes out before the context gets destroyed
             }
 
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
-            using (var context = cryptClient.StartExplicitDecryptionContext(encryptedResult.ToArray()))
+            using (var context = cryptClient.StartExplicitDecryptionContext(encryptedBytes))
             {
                 var (decryptedResult, _) = ProcessContextToCompletion(context);
 
@@ -224,7 +225,7 @@ namespace MongoDB.Crypt.Test
 
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
             {
-                Binary encryptedResult;
+                byte[] encryptedResult;
                 using (var context = cryptClient.StartExplicitEncryptionContext(
                     key: key,
                     encryptionAlgorithm: EncryptionAlgorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Deterministic,
@@ -241,14 +242,14 @@ namespace MongoDB.Crypt.Test
                     (state, binaryProduced, operationProduced) = ProcessState(context);
                     state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
                     operationProduced.Should().Equal(ReadJsonTestFile("encrypted-value.json"));
-                    encryptedResult = binaryProduced;
+                    encryptedResult = binaryProduced.ToArray(); // need to copy bytes out before the context gets destroyed
 
                     (state, _, _) = ProcessState(context);
                     state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
 
                 }
 
-                using (var context = cryptClient.StartExplicitDecryptionContext(encryptedResult.ToArray()))
+                using (var context = cryptClient.StartExplicitDecryptionContext(encryptedResult))
                 {
                     var (state, decryptedBinary, _) = ProcessState(context);
                     state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
