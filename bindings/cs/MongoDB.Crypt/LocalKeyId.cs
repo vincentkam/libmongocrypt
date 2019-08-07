@@ -47,15 +47,15 @@ namespace MongoDB.Crypt
 
         public KmsType KeyType => KmsType.Local;
 
-        void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
+        void IInternalKmsKeyId.SetCredentials(ContextSafeHandle context, Status status)
         {
-            handle.Check(status, Library.mongocrypt_ctx_setopt_masterkey_local(handle));
-            ((IInternalKmsKeyId) this).SetAlternateKeyNames(handle, status);
+            context.Check(status, Library.mongocrypt_ctx_setopt_masterkey_local(context));
+            ((IInternalKmsKeyId) this).SetAlternateKeyNames(context, status);
         }
 
-        void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle handle, Status status)
+        void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle context, Status status)
         {
-            this.SetAlternateKeyNames(handle, status);
+            this.SetAlternateKeyNames(context, status);
         }
     }
 }

@@ -47,8 +47,8 @@ namespace MongoDB.Crypt
     /// </summary>
     internal interface IInternalKmsKeyId
     {
-        void SetCredentials(ContextSafeHandle handle, Status status);
-        void SetAlternateKeyNames(ContextSafeHandle handle, Status status);
+        void SetCredentials(ContextSafeHandle context, Status status);
+        void SetAlternateKeyNames(ContextSafeHandle context, Status status);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ namespace MongoDB.Crypt
     /// </summary>
     internal static class IKmsExtensions
     {
-        internal static void SetAlternateKeyNames(this IKmsKeyId kmsKeyId, ContextSafeHandle handle, Status status)
+        internal static void SetAlternateKeyNames(this IKmsKeyId kmsKeyId, ContextSafeHandle context, Status status)
         {
             foreach (var alternateKeyName in kmsKeyId.AlternateKeyNames)
             {
@@ -67,7 +67,7 @@ namespace MongoDB.Crypt
                         IntPtr ptr = (IntPtr)p;
                         using (PinnedBinary pinned = new PinnedBinary(ptr, (uint)alternateKeyName.Length))
                         {
-                            handle.Check( status, Library.mongocrypt_ctx_setopt_key_alt_name(handle, pinned.Handle));
+                            context.Check( status, Library.mongocrypt_ctx_setopt_key_alt_name(context, pinned.Handle));
                         }
                     }
                 }

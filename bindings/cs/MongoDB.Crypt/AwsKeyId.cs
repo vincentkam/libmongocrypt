@@ -69,7 +69,7 @@ namespace MongoDB.Crypt
         /// <value>The region.</value>
         public string Region { get; }
 
-        void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
+        void IInternalKmsKeyId.SetCredentials(ContextSafeHandle context, Status status)
         {
             IntPtr regionPointer = (IntPtr)Marshal.StringToHGlobalAnsi(Region);
 
@@ -79,10 +79,10 @@ namespace MongoDB.Crypt
                 try
                 {
                     // Let mongocrypt run strlen
-                    handle.Check(
+                    context.Check(
                         status,
-                        Library.mongocrypt_ctx_setopt_masterkey_aws(handle, regionPointer, -1, keyPointer, -1));
-                    ((IInternalKmsKeyId) this).SetAlternateKeyNames(handle, status);
+                        Library.mongocrypt_ctx_setopt_masterkey_aws(context, regionPointer, -1, keyPointer, -1));
+                    ((IInternalKmsKeyId) this).SetAlternateKeyNames(context, status);
                 }
                 finally
                 {
@@ -95,9 +95,9 @@ namespace MongoDB.Crypt
             }
         }
 
-        void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle handle, Status status)
+        void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle context, Status status)
         {
-            this.SetAlternateKeyNames(handle, status);
+            this.SetAlternateKeyNames(context, status);
         }
     }
 }
