@@ -25,7 +25,6 @@ namespace MongoDB.Crypt
     /// <summary>Contains all the information needed to find a AWS KMS CMK.</summary>
     public class AwsKeyId : IKmsKeyId, IInternalKmsKeyId
     {
-        public KmsType KeyType => KmsType.Aws;
 
         /// <summary>
         /// Creates an <see cref="AwsKeyId"/> class.
@@ -54,9 +53,6 @@ namespace MongoDB.Crypt
             AlternateKeyNames = alternateKeyNames.ToList().AsReadOnly();
         }
 
-        /// <summary>Gets the region.</summary>
-        /// <value>The region.</value>
-        public string Region { get; }
         public IReadOnlyList<byte[]> AlternateKeyNames { get; }
 
         /// <summary>
@@ -66,6 +62,12 @@ namespace MongoDB.Crypt
         /// The customer master key.
         /// </value>
         public string CustomerMasterKey { get; }
+
+        public KmsType KeyType => KmsType.Aws;
+
+        /// <summary>Gets the region.</summary>
+        /// <value>The region.</value>
+        public string Region { get; }
 
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
         {

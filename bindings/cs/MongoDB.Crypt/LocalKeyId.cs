@@ -43,9 +43,9 @@ namespace MongoDB.Crypt
             AlternateKeyNames = alternateKeyNames.ToList().AsReadOnly();
         }
 
-        public KmsType KeyType => KmsType.Local;
         public IReadOnlyList<byte[]> AlternateKeyNames { get; }
 
+        public KmsType KeyType => KmsType.Local;
 
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle handle, Status status)
         {
