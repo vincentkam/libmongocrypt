@@ -35,7 +35,7 @@ namespace MongoDB.Crypt
         {
             Region = region;
             CustomerMasterKey = customerMasterKey;
-            AlternateKeyNames = new List<byte[]>().AsReadOnly();
+            AlternateKeyNameBsonDocuments = new List<byte[]>().AsReadOnly();
         }
 
         /// <summary>
@@ -43,17 +43,18 @@ namespace MongoDB.Crypt
         /// </summary>
         /// <param name="customerMasterKey">The customerMasterKey.</param>
         /// <param name="region">The region.</param>
-        /// <param name="alternateKeyNames">The alternate key names.
+        /// <param name="alternateKeyNamesBsonDocuments">The alternate key names.
         /// Each byte array describes an alternative key name via a BsonDocument in the following format:
         ///  { "keyAltName" : [BSON UTF8 value] }</param>
-        public AwsKeyId(string customerMasterKey, string region, IEnumerable<byte[]> alternateKeyNames)
+        public AwsKeyId(string customerMasterKey, string region, IEnumerable<byte[]> alternateKeyNamesBsonDocuments)
         {
             Region = region;
             CustomerMasterKey = customerMasterKey;
-            AlternateKeyNames = alternateKeyNames.ToList().AsReadOnly();
+            AlternateKeyNameBsonDocuments = alternateKeyNamesBsonDocuments.ToList().AsReadOnly();
         }
 
-        public IReadOnlyList<byte[]> AlternateKeyNames { get; }
+        /// <inheritdoc />
+        public IReadOnlyList<byte[]> AlternateKeyNameBsonDocuments { get; }
 
         /// <summary>
         /// Gets the customer master key.
@@ -63,12 +64,14 @@ namespace MongoDB.Crypt
         /// </value>
         public string CustomerMasterKey { get; }
 
+        /// <inheritdoc />
         public KmsType KeyType => KmsType.Aws;
 
         /// <summary>Gets the region.</summary>
         /// <value>The region.</value>
         public string Region { get; }
 
+        /// <inheritdoc />
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle context, Status status)
         {
             IntPtr regionPointer = (IntPtr)Marshal.StringToHGlobalAnsi(Region);
@@ -95,6 +98,7 @@ namespace MongoDB.Crypt
             }
         }
 
+        /// <inheritdoc />
         void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle context, Status status)
         {
             this.SetAlternateKeyNames(context, status);

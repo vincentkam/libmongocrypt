@@ -266,7 +266,7 @@ namespace MongoDB.Crypt.Test
             var keyAltNames = new[] {"KeyMaker", "Architect"};
             var keyAltNameDocuments = keyAltNames.Select(name => new BsonDocument("keyAltName", name));
             var keyAltNameBuffers = keyAltNameDocuments.Select(BsonUtil.ToBytes);
-            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: keyAltNameBuffers);
+            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNamesBsonDocuments: keyAltNameBuffers);
             var key = new AwsKmsCredentials(awsSecretAccessKey: "us-east-1", awsAccessKeyId: "us-east-1");
 
             using (var cryptClient = CryptClientFactory.Create(new CryptOptions(key)))
@@ -287,7 +287,7 @@ namespace MongoDB.Crypt.Test
             var keyAltNames = new[] {"KeyMaker", "Architect"};
             var keyAltNameDocuments = keyAltNames.Select(name => new BsonDocument("keyAltName", name));
             var keyAltNameBuffers = keyAltNameDocuments.Select(BsonUtil.ToBytes);
-            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: keyAltNameBuffers);
+            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNamesBsonDocuments: keyAltNameBuffers);
             var key = new AwsKmsCredentials(awsSecretAccessKey: "us-east-1", awsAccessKeyId: "us-east-1");
 
             using (var cryptClient = CryptClientFactory.Create(new CryptOptions(key)))

@@ -28,31 +28,35 @@ namespace MongoDB.Crypt
         /// <param name="key">The key.</param>
         public LocalKeyId()
         {
-            AlternateKeyNames = new List<byte[]>().AsReadOnly();
+            AlternateKeyNameBsonDocuments = new List<byte[]>().AsReadOnly();
         }
 
         /// <summary>
         /// Creates an <see cref="LocalKeyId"/> class.
         /// </summary>
-        /// <param name="alternateKeyNames">The alternate key names.
+        /// <param name="alternateKeyNameBsonDocuments">The alternate key names.
         /// Each byte array describes an alternative key name via a BsonDocument in the following format:
         ///  { "keyAltName" : [BSON UTF8 value] }
         /// </param>
-        public LocalKeyId(IEnumerable<byte[]> alternateKeyNames)
+        public LocalKeyId(IEnumerable<byte[]> alternateKeyNameBsonDocuments)
         {
-            AlternateKeyNames = alternateKeyNames.ToList().AsReadOnly();
+            AlternateKeyNameBsonDocuments = alternateKeyNameBsonDocuments.ToList().AsReadOnly();
         }
 
-        public IReadOnlyList<byte[]> AlternateKeyNames { get; }
+        /// <inheritdoc />
+        public IReadOnlyList<byte[]> AlternateKeyNameBsonDocuments { get; }
 
+        /// <inheritdoc />
         public KmsType KeyType => KmsType.Local;
 
+        /// <inheritdoc />
         void IInternalKmsKeyId.SetCredentials(ContextSafeHandle context, Status status)
         {
             context.Check(status, Library.mongocrypt_ctx_setopt_masterkey_local(context));
             ((IInternalKmsKeyId) this).SetAlternateKeyNames(context, status);
         }
 
+        /// <inheritdoc />
         void IInternalKmsKeyId.SetAlternateKeyNames(ContextSafeHandle context, Status status)
         {
             this.SetAlternateKeyNames(context, status);

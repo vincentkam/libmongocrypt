@@ -38,7 +38,7 @@ namespace MongoDB.Crypt
         ///  { "keyAltName" : [BSON UTF8 value] }
         /// </summary>
         /// <value>The alternate key names.</value>
-        IReadOnlyList<byte[]> AlternateKeyNames { get; }
+        IReadOnlyList<byte[]> AlternateKeyNameBsonDocuments { get; }
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ namespace MongoDB.Crypt
     {
         internal static void SetAlternateKeyNames(this IKmsKeyId kmsKeyId, ContextSafeHandle context, Status status)
         {
-            foreach (var alternateKeyName in kmsKeyId.AlternateKeyNames)
+            foreach (var alternateKeyName in kmsKeyId.AlternateKeyNameBsonDocuments)
             {
                 unsafe
                 {
