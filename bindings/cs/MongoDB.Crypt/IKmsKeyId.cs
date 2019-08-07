@@ -54,7 +54,7 @@ namespace MongoDB.Crypt
     /// <summary>
     /// Using extension methods in lieu of default interface methods that will not be available until C#8 releases
     /// </summary>
-    internal static class KmsExtensions
+    internal static class IKmsExtensions
     {
         internal static void SetAlternateKeyNames(this IKmsKeyId kmsKeyId, ContextSafeHandle handle, Status status)
         {
