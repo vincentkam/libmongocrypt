@@ -281,6 +281,34 @@ namespace MongoDB.Crypt.Test
         }
 
         [Fact]
+        public void TestAwsKeyCreationWithAltKeyNamesStepwise()
+        {
+            var altKeyNames = new[] {"KeyMaker", "Architect"};
+            var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
+            var altKeyNameBuffers = altKeyNameDocuments.Select(BsonUtil.ToBytes);
+            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: altKeyNameBuffers);
+            var key = new AwsKmsCredentials(awsSecretAccessKey: "us-east-1", awsAccessKeyId: "us-east-1");
+
+            using (var cryptClient = CryptClientFactory.Create(new CryptOptions(key)))
+            using (var context =
+                cryptClient.StartCreateDataKeyContext(keyId))
+            {
+                BsonDocument dataKeyDocument;
+                var (state, _, _) = ProcessState(context, isKmsDecrypt: false);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_NEED_KMS);
+
+                (state, _, dataKeyDocument) = ProcessState(context, isKmsDecrypt: false);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
+                dataKeyDocument.Should().NotBeNull();
+                var actualAltKeyNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
+                actualAltKeyNames.Should().Contain(altKeyNames);
+
+                (state, _, _) = ProcessState(context, isKmsDecrypt: false);
+                state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
+            }
+        }
+
+        [Fact]
         public void TestLocalKeyCreationWithAltKeyNames()
         {
             var altKeyNames = new[] {"KeyMaker", "Architect"};
