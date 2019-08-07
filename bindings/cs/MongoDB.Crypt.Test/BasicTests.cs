@@ -261,12 +261,12 @@ namespace MongoDB.Crypt.Test
         }
 
         [Fact]
-        public void TestAwsKeyCreationWithAltKeyNames()
+        public void TestAwsKeyCreationWithkeyAltNames()
         {
-            var altKeyNames = new[] {"KeyMaker", "Architect"};
-            var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
-            var altKeyNameBuffers = altKeyNameDocuments.Select(BsonUtil.ToBytes);
-            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: altKeyNameBuffers);
+            var keyAltNames = new[] {"KeyMaker", "Architect"};
+            var keyAltNameDocuments = keyAltNames.Select(name => new BsonDocument("keyAltName", name));
+            var keyAltNameBuffers = keyAltNameDocuments.Select(BsonUtil.ToBytes);
+            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: keyAltNameBuffers);
             var key = new AwsKmsCredentials(awsSecretAccessKey: "us-east-1", awsAccessKeyId: "us-east-1");
 
             using (var cryptClient = CryptClientFactory.Create(new CryptOptions(key)))
@@ -275,18 +275,19 @@ namespace MongoDB.Crypt.Test
             {
                 var (_, dataKeyDocument) = ProcessContextToCompletion(context, isKmsDecrypt: false);
                 dataKeyDocument.Should().NotBeNull();
-                var actualAltKeyNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
-                actualAltKeyNames.Should().Contain(altKeyNames);
+                var actualKeyAltNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
+                var expectedKeyAltNames = keyAltNames.Reverse(); // https://jira.mongodb.org/browse/CDRIVER-3277?
+                actualKeyAltNames.Should().BeEquivalentTo(expectedKeyAltNames);
             }
         }
 
         [Fact]
-        public void TestAwsKeyCreationWithAltKeyNamesStepwise()
+        public void TestAwsKeyCreationWithkeyAltNamesStepwise()
         {
-            var altKeyNames = new[] {"KeyMaker", "Architect"};
-            var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
-            var altKeyNameBuffers = altKeyNameDocuments.Select(BsonUtil.ToBytes);
-            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: altKeyNameBuffers);
+            var keyAltNames = new[] {"KeyMaker", "Architect"};
+            var keyAltNameDocuments = keyAltNames.Select(name => new BsonDocument("keyAltName", name));
+            var keyAltNameBuffers = keyAltNameDocuments.Select(BsonUtil.ToBytes);
+            var keyId = new AwsKeyId( customerMasterKey: "cmk", region: "us-east-1", alternateKeyNames: keyAltNameBuffers);
             var key = new AwsKmsCredentials(awsSecretAccessKey: "us-east-1", awsAccessKeyId: "us-east-1");
 
             using (var cryptClient = CryptClientFactory.Create(new CryptOptions(key)))
@@ -300,8 +301,9 @@ namespace MongoDB.Crypt.Test
                 (state, _, dataKeyDocument) = ProcessState(context, isKmsDecrypt: false);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
                 dataKeyDocument.Should().NotBeNull();
-                var actualAltKeyNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
-                actualAltKeyNames.Should().Contain(altKeyNames);
+                var actualKeyAltNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
+                var expectedKeyAltNames = keyAltNames.Reverse(); // https://jira.mongodb.org/browse/CDRIVER-3277?
+                actualKeyAltNames.Should().BeEquivalentTo(expectedKeyAltNames);
 
                 (state, _, _) = ProcessState(context, isKmsDecrypt: false);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
@@ -309,13 +311,13 @@ namespace MongoDB.Crypt.Test
         }
 
         [Fact]
-        public void TestLocalKeyCreationWithAltKeyNames()
+        public void TestLocalKeyCreationWithkeyAltNames()
         {
-            var altKeyNames = new[] {"KeyMaker", "Architect"};
-            var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
-            var altKeyNameBuffers = altKeyNameDocuments.Select(BsonUtil.ToBytes);
+            var keyAltNames = new[] {"KeyMaker", "Architect"};
+            var keyAltNameDocuments = keyAltNames.Select(name => new BsonDocument("keyAltName", name));
+            var keyAltNameBuffers = keyAltNameDocuments.Select(BsonUtil.ToBytes);
             var key = new LocalKmsCredentials(new byte[96]);
-            var keyId = new LocalKeyId(altKeyNameBuffers);
+            var keyId = new LocalKeyId(keyAltNameBuffers);
             var cryptOptions = new CryptOptions(key);
 
             using (var cryptClient = CryptClientFactory.Create(cryptOptions))
@@ -324,19 +326,20 @@ namespace MongoDB.Crypt.Test
             {
                 var (_, dataKeyDocument) = ProcessContextToCompletion(context);
                 dataKeyDocument.Should().NotBeNull();
-                var actualAltKeyNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
-                actualAltKeyNames.Should().Contain(altKeyNames);
+                var actualKeyAltNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
+                var expectedKeyAltNames = keyAltNames.Reverse(); // https://jira.mongodb.org/browse/CDRIVER-3277?
+                actualKeyAltNames.Should().BeEquivalentTo(expectedKeyAltNames);
             }
         }
 
         [Fact]
-        public void TestLocalKeyCreationWithAltKeyNamesStepwise()
+        public void TestLocalKeyCreationWithkeyAltNamesStepwise()
         {
-            var altKeyNames = new[] {"KeyMaker", "Architect"};
-            var altKeyNameDocuments = altKeyNames.Select(name => new BsonDocument("keyAltName", name));
-            var altKeyNameBuffers = altKeyNameDocuments.Select(BsonUtil.ToBytes);
+            var keyAltNames = new[] {"KeyMaker", "Architect"};
+            var keyAltNameDocuments = keyAltNames.Select(name => new BsonDocument("keyAltName", name));
+            var keyAltNameBuffers = keyAltNameDocuments.Select(BsonUtil.ToBytes);
             var key = new LocalKmsCredentials(new byte[96]);
-            var keyId = new LocalKeyId(altKeyNameBuffers);
+            var keyId = new LocalKeyId(keyAltNameBuffers);
             var cryptOptions = new CryptOptions(key);
 
             using (var cryptClient = CryptClientFactory.Create(cryptOptions))
@@ -346,8 +349,9 @@ namespace MongoDB.Crypt.Test
                 var (state, _, dataKeyDocument) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_READY);
                 dataKeyDocument.Should().NotBeNull();
-                var actualAltKeyNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
-                actualAltKeyNames.Should().Contain(altKeyNames);
+                var actualKeyAltNames = dataKeyDocument["keyAltNames"].AsBsonArray.Select(x => x.AsString);
+                var expectedKeyAltNames = keyAltNames.Reverse(); // https://jira.mongodb.org/browse/CDRIVER-3277?
+                actualKeyAltNames.Should().BeEquivalentTo(expectedKeyAltNames);
 
                 (state, _, _) = ProcessState(context);
                 state.Should().Be(CryptContext.StateCode.MONGOCRYPT_CTX_DONE);
