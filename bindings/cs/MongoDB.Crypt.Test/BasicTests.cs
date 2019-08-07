@@ -504,7 +504,7 @@ namespace MongoDB.Crypt.Test
         {
             string[] searchPaths = new [] { Path.Combine("..", "test", "example"), Path.Combine("..", "test", "data") };
             var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string cwd = Directory.GetCurrentDirectory(); // Assume we are child directory of the repo
+            string cwd = Directory.GetCurrentDirectory(); // Assume we are in a child directory of the repo
             var searchDirectory = assemblyLocation ?? cwd;
             var testDirs = Enumerable.Range(1, 10)
                 .Select(i => Enumerable.Repeat("..", i))
