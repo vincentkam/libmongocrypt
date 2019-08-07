@@ -40,7 +40,7 @@ namespace MongoDB.Crypt
             if (!is64Bit)
             {
                 throw new PlatformNotSupportedException(
-                    $"{this.GetType().Namespace} needs to be run in a 64-bit process on a 64-bit OS.");
+                    $"{this.GetType().Namespace} needs to be run in a 64-bit process.");
             }
 
             // Windows:
