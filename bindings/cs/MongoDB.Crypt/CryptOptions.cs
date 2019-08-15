@@ -14,26 +14,53 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MongoDB.Crypt
 {
     /// <summary>
-    /// Options to configure mongocrypt with
+    /// Options to configure mongocrypt with.
     /// </summary>
     public class CryptOptions
     {
-        public IKmsCredentials KmsCredentials { get; }
+        public readonly Dictionary<KmsType, IKmsCredentials> KmsCredentialsOptions = new Dictionary<KmsType, IKmsCredentials>();
         public byte[] Schema { get; }
 
-        public CryptOptions(IKmsCredentials kmsCredentials)
+        public CryptOptions(IKmsCredentials kmsCredentials) : this(kmsCredentials, null)
         {
-            KmsCredentials = kmsCredentials;
         }
 
-        public CryptOptions(IKmsCredentials kmsCredentials, byte[] schema)
+        public CryptOptions(IKmsCredentials kmsCredential, byte[] schema) : this(new[] { kmsCredential }, schema)
         {
-            KmsCredentials = kmsCredentials;
+        }
+
+        public CryptOptions(IEnumerable<IKmsCredentials> kmsCredentials) : this(kmsCredentials, null)
+        {
+        }
+
+        public CryptOptions(IEnumerable<IKmsCredentials> kmsCredentials, byte[] schema)
+        {
+            InitializeKmsCredentials(kmsCredentials.ToList());
             Schema = schema;
+        }
+
+        private void InitializeKmsCredentials(List<IKmsCredentials> kmsCredentials)
+        {
+            if (kmsCredentials != null && kmsCredentials.Count != 0)
+            {
+                foreach (var kmsCredential in kmsCredentials)
+                {
+                    if (KmsCredentialsOptions.ContainsKey(kmsCredential.KmsType))
+                    {
+                        KmsCredentialsOptions[kmsCredential.KmsType] = kmsCredential;
+                    }
+                    else
+                    {
+                        KmsCredentialsOptions.Add(kmsCredential.KmsType, kmsCredential);
+                    }
+                }
+            }
         }
 
         // TODO: - add configurable logging support

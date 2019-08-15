@@ -37,13 +37,20 @@ namespace MongoDB.Crypt.Test
             _output = output;
         }
         
-        CryptOptions CreateOptions()
+        CryptOptions CreateOptions(byte[] localKmsKeyId = null)
         {
-            return new CryptOptions(
+            var credentialsOptions = new List<IKmsCredentials>
+            {
                 new AwsKmsCredentials(
                     awsSecretAccessKey: "us-east-1",
                     awsAccessKeyId: "us-east-1")
-            );
+            };
+            if (localKmsKeyId != null)
+            {
+                credentialsOptions.Add(new LocalKmsCredentials(localKmsKeyId));
+            }
+
+            return new CryptOptions(credentialsOptions);
         }
 
         AwsKeyId CreateKey()
@@ -204,6 +211,36 @@ namespace MongoDB.Crypt.Test
             }
 
             using (var cryptClient = CryptClientFactory.Create(CreateOptions()))
+            using (var context = cryptClient.StartExplicitDecryptionContext(encryptedBytes))
+            {
+                var (decryptedResult, _) = ProcessContextToCompletion(context);
+
+                decryptedResult.ToArray().Should().Equal(testData);
+            }
+        }
+
+        [Fact]
+        public void EncryptExplicitWithLocalAndAwsCredentials()
+        {
+            var keyDoc = ReadJsonTestFile("key-document.json");
+            Guid key = keyDoc["_id"].AsGuid;
+
+            BsonDocument doc = new BsonDocument()
+            {
+                {  "v" , "hello" },
+            };
+
+            var testData = BsonUtil.ToBytes(doc);
+
+            byte[] encryptedBytes;
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions(key.ToByteArray())))
+            using (var context = cryptClient.StartExplicitEncryptionContext(key, EncryptionAlgorithm.AEAD_AES_256_CBC_HMAC_SHA_512_Random, testData))
+            {
+                var (encryptedBinary, encryptedDocument) = ProcessContextToCompletion(context);
+                encryptedBytes = encryptedBinary.ToArray(); // need to copy bytes out before the context gets destroyed
+            }
+
+            using (var cryptClient = CryptClientFactory.Create(CreateOptions(key.ToByteArray())))
             using (var context = cryptClient.StartExplicitDecryptionContext(encryptedBytes))
             {
                 var (decryptedResult, _) = ProcessContextToCompletion(context);
